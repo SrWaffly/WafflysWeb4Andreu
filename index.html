@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sr.Waffly's Place - App Local</title>
+    <title>Sr.Waffly's Place - v1.0.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @keyframes naturalFloat {
@@ -14,20 +14,19 @@
         }
         
         .emoji-animated {
-            font-size: 100px;
+            font-size: 80px;
             display: inline-block;
             animation: naturalFloat 6s ease-in-out infinite;
-            line-height: 1;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));
             user-select: none;
         }
 
         #video-container {
             position: relative;
-            background: #1a1a1a;
-            border-radius: 12px;
+            background: #111;
+            border-radius: 16px;
             overflow: hidden;
             aspect-ratio: 16 / 9;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         
         video {
@@ -37,409 +36,327 @@
             transform: scaleX(-1);
         }
 
-        .text-pastel-pink { color: #fbcfe8; }
-
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(12px);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        #cookie-banner {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            width: 90%;
-            max-width: 500px;
-            display: none;
-        }
-
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #1e293b; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
 
-        #history-panel {
-            transition: transform 0.3s ease-in-out;
-            transform: translateX(100%);
-        }
-        #history-panel.open {
-            transform: translateX(0);
+        .btn-primary {
+            background-color: #fbcfe8;
+            color: #1e293b;
+            font-weight: bold;
+            transition: all 0.2s;
         }
 
-        .sound-btn:active {
-            transform: scale(0.95);
+        .btn-primary:hover {
+            background-color: #f9a8d4;
+            transform: translateY(-2px);
         }
+
+        .modal-overlay {
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(4px);
+        }
+
+        .history-item:hover .delete-btn { opacity: 1; }
     </style>
 </head>
-<body class="bg-slate-900 text-white min-h-screen p-4 md:p-8 overflow-x-hidden" onclick="resumeAudioContext()">
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 overflow-x-hidden">
 
-    <!-- Modal de Inicio -->
-    <div id="restore-modal" class="modal-overlay hidden">
-        <div class="bg-slate-800 border border-slate-700 p-8 rounded-3xl shadow-2xl max-w-md w-full text-center">
-            <div class="text-5xl mb-4">🐈‍⬛</div>
-            <h2 class="text-2xl font-bold text-pink-200 mb-2">¡Bienvenido de nuevo!</h2>
-            <p class="text-slate-400 mb-6">He encontrado rastros de tu sesión anterior. ¿Qué prefieres hacer?</p>
+    <!-- Modal de Bienvenida / Recuperación -->
+    <div id="session-modal" class="fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-6 text-center">
+            <span class="text-5xl">🐾</span>
+            <h3 class="text-2xl font-bold text-pink-200 mt-4">¡Hola de nuevo!</h3>
+            <p class="text-slate-400">Hemos detectado datos guardados de tu sesión anterior.</p>
             <div class="space-y-3">
-                <button onclick="confirmRestore(true)" class="w-full bg-pink-400 hover:bg-pink-300 text-slate-900 py-3 rounded-xl font-bold transition-all shadow-lg">Continuar donde lo dejé</button>
-                <button onclick="confirmRestore(false)" class="w-full bg-slate-700 hover:bg-red-500/20 hover:text-red-400 py-3 rounded-xl font-bold transition-all border border-transparent hover:border-red-500/50">Empezar de cero</button>
+                <button onclick="sessionAction('continue')" class="w-full btn-primary py-3 rounded-xl">Continuar donde lo dejé</button>
+                <button onclick="sessionAction('reset')" class="w-full bg-slate-700 hover:bg-red-500/20 py-3 rounded-xl border border-slate-600 transition-all text-sm">Empezar de cero (Borrar todo)</button>
+            </div>
+            <div class="flex items-center gap-3 justify-center text-xs text-slate-500">
+                <input type="checkbox" id="skip-modal" class="rounded bg-slate-900 border-slate-700 text-pink-400">
+                <label for="skip-modal">No volver a preguntar (recordar mi elección)</label>
             </div>
         </div>
     </div>
 
-    <!-- Banner de Información Local -->
-    <div id="cookie-banner" class="bg-slate-800 border border-pink-400 p-6 rounded-2xl shadow-2xl">
-        <h3 class="text-pink-200 font-bold mb-2">🐾 Modo Aplicación Local</h3>
-        <p class="text-sm text-slate-300 mb-4">Guardaremos tus notas y sonidos en la memoria del navegador. Si el navegador lo bloquea, los datos se perderán al cerrar.</p>
-        <div class="flex gap-2">
-            <button onclick="acceptCookies()" class="flex-1 bg-pink-400 text-slate-900 py-2 rounded-lg font-bold text-sm hover:bg-pink-300 transition-colors">Entendido</button>
+    <!-- Menú de Ajustes / Factory Reset -->
+    <div id="settings-modal" class="fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-red-500/30 p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-6">
+            <div class="text-center">
+                <span class="text-4xl">⚙️</span>
+                <h3 class="text-2xl font-bold text-white mt-4">Ajustes del Sistema</h3>
+                <p class="text-slate-400 text-sm mt-2">Gestiona el almacenamiento de la web.</p>
+            </div>
+            <div class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                <p class="text-xs text-red-200 mb-4">Esta acción borrará sonidos, historial, notas y reseteará las preferencias de inicio.</p>
+                <button onclick="factoryReset()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all">Borrar toda la información</button>
+            </div>
+            <button onclick="toggleSettings()" class="w-full text-slate-400 text-sm hover:underline">Cancelar</button>
         </div>
     </div>
 
-    <!-- Panel de Historial -->
-    <div id="history-panel" class="fixed top-0 right-0 h-full w-80 bg-slate-800 z-[100] shadow-2xl border-l border-slate-700 p-6 flex flex-col">
+    <!-- Banner de Cookies -->
+    <div id="cookie-banner" class="fixed bottom-0 left-0 right-0 z-[90] p-6 translate-y-full transition-transform duration-500">
+        <div class="max-w-4xl mx-auto bg-slate-800 border border-pink-500/30 rounded-2xl shadow-2xl p-6 flex flex-col md:flex-row items-center gap-6">
+            <div class="flex-1 text-center md:text-left">
+                <h4 class="font-bold text-pink-200">🍪 Aviso de Privacidad Local</h4>
+                <p class="text-sm text-slate-400">Usamos almacenamiento local para tus notas, sonidos e historial. Nada sale de tu navegador.</p>
+            </div>
+            <button onclick="acceptCookies()" class="btn-primary px-8 py-2 rounded-xl text-sm">Aceptar y Guardar</button>
+        </div>
+    </div>
+
+    <!-- Historial Lateral -->
+    <div id="history-sidebar" class="fixed top-0 right-0 h-full w-80 bg-slate-800 shadow-2xl z-50 translate-x-full transition-transform duration-300 border-l border-slate-700 p-6 flex flex-col">
         <div class="flex justify-between items-center mb-6">
-            <h3 class="text-pink-200 font-bold text-xl">Historial</h3>
+            <h3 class="font-bold text-pink-200">Historial Visual</h3>
             <button onclick="toggleHistory()" class="text-slate-400 hover:text-white text-2xl">&times;</button>
         </div>
-        <div id="history-list" class="flex-grow overflow-y-auto custom-scroll space-y-3"></div>
-        <div class="mt-4 pt-4 border-t border-slate-700 space-y-2">
-            <button onclick="resetAllData()" class="w-full py-2 text-xs text-white bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 rounded transition-colors font-bold uppercase">Limpieza Total</button>
-        </div>
+        <div id="history-list" class="space-y-4 overflow-y-auto flex-1 custom-scroll pr-2"></div>
+        <button onclick="clearHistory()" class="mt-6 py-3 text-xs bg-red-500/20 hover:bg-red-500/40 text-red-200 rounded-xl border border-red-500/30 transition-all">Limpiar Historial</button>
     </div>
 
     <div class="max-w-6xl mx-auto space-y-8">
-        <header class="text-center py-4">
+        <!-- Header -->
+        <header class="text-center relative">
             <div class="emoji-animated">🐱</div>
-            <h1 class="text-4xl font-bold mt-4 text-pastel-pink">Sr.Waffly's Place</h1>
-            <p class="text-slate-400 font-medium tracking-tight uppercase text-xs">Offline App / Local Media</p>
+            <h1 class="text-4xl font-bold mt-2 text-pink-200">Sr.Waffly's Place</h1>
+            <p class="text-slate-400 text-sm uppercase tracking-widest font-mono">Versión 1.0.0 / GitHub Hosted</p>
+            <div class="absolute right-0 top-1/2 -translate-y-1/2 flex gap-2">
+                <button onclick="toggleSettings()" class="bg-slate-800 p-3 rounded-full hover:bg-slate-700 border border-slate-700 shadow-lg" title="Ajustes">⚙️</button>
+                <button onclick="toggleHistory()" class="bg-slate-800 p-3 rounded-full hover:bg-slate-700 border border-slate-700 shadow-lg" title="Historial">🕒</button>
+            </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Cámara -->
-            <section class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 md:col-span-2">
-                <h2 class="text-xl font-semibold mb-4 text-pink-200 flex items-center gap-2">📷 Cámara</h2>
-                <div id="video-container">
-                    <video id="webcam" autoplay playsinline></video>
-                    <div id="camera-placeholder" class="absolute inset-0 flex items-center justify-center text-slate-500 text-sm">Cámara apagada o bloqueada por seguridad local.</div>
-                </div>
-                <div class="mt-4 flex gap-2">
-                    <button onclick="startCamera()" class="bg-pink-400 hover:bg-pink-300 text-slate-900 px-6 py-3 rounded-lg w-full font-bold">Activar</button>
-                    <button onclick="stopCamera()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-3 rounded-lg">Apagar</button>
-                </div>
-            </section>
+            <div class="lg:col-span-2">
+                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                    <h2 class="text-xl font-semibold mb-4 text-pink-200 flex items-center gap-2">📷 Cámara en Vivo</h2>
+                    <div id="video-container">
+                        <video id="webcam" autoplay playsinline></video>
+                        <div id="cam-msg" class="absolute inset-0 flex items-center justify-center text-slate-500">Cámara Apagada</div>
+                    </div>
+                    <div class="mt-4 flex gap-3">
+                        <button onclick="startCamera()" class="btn-primary flex-1 py-3 rounded-xl">Activar</button>
+                        <button onclick="stopCamera()" class="bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-xl font-bold">Apagar</button>
+                    </div>
+                </section>
+            </div>
 
             <!-- Notas -->
-            <section class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 md:col-span-1 flex flex-col">
-                <h2 class="text-xl font-semibold mb-4 text-pink-200 flex items-center gap-2">📝 Notas</h2>
-                <textarea id="user-notes" class="w-full flex-grow bg-slate-900 text-slate-200 border border-slate-700 rounded-xl p-4 focus:ring-2 focus:ring-pink-300 outline-none resize-none min-h-[200px] custom-scroll" placeholder="Escribe aquí..." oninput="saveNotes()"></textarea>
-            </section>
+            <div class="lg:col-span-1">
+                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 h-full flex flex-col">
+                    <h2 class="text-xl font-semibold mb-4 text-pink-200">📝 Notas Rápidas</h2>
+                    <textarea id="notes" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-4 text-slate-200 focus:outline-none resize-none custom-scroll" placeholder="Escribe aquí..." oninput="saveNotes()"></textarea>
+                </section>
+            </div>
 
-            <!-- Reproductor -->
-            <section class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 md:col-span-3">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                    <h2 class="text-xl font-semibold text-pink-200 flex items-center gap-2">📺 YouTube</h2>
-                    <div class="flex flex-1 max-w-xl gap-2">
-                        <input type="text" id="video-url" placeholder="Enlace de YouTube..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm focus:border-pink-300 outline-none">
-                        <button onclick="changeVideo()" class="bg-pink-400 hover:bg-pink-300 text-slate-900 px-4 py-2 rounded-lg font-bold">Cargar</button>
-                        <button onclick="toggleHistory()" class="bg-slate-700 hover:bg-slate-600 p-2 rounded-lg">🕒</button>
+            <!-- YouTube -->
+            <div class="lg:col-span-3">
+                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                        <h2 class="text-xl font-semibold text-pink-200">📺 YouTube Player</h2>
+                        <div class="flex w-full md:w-auto gap-2">
+                            <input type="text" id="video-url" placeholder="ID o URL de YouTube..." class="bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm w-full md:w-80 focus:border-pink-300 outline-none">
+                            <button onclick="changeVideo()" class="btn-primary px-6 py-2 rounded-lg">Cargar</button>
+                        </div>
                     </div>
-                </div>
-                <div class="aspect-video w-full rounded-xl overflow-hidden bg-black border border-slate-700 relative mb-8">
-                    <div id="yt-player-container"></div>
-                </div>
-                
-                <!-- Botonera -->
-                <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-700">
+                    <div class="aspect-video w-full max-w-4xl mx-auto rounded-xl overflow-hidden bg-black shadow-inner">
+                        <div id="player"></div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Sonidos -->
+            <div class="lg:col-span-3">
+                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
                     <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-lg font-bold text-pink-200">🎵 Botonera</h3>
-                        <label class="cursor-pointer text-xs bg-slate-700 hover:bg-pink-500/20 hover:text-pink-300 px-3 py-1 rounded-full border border-slate-600">
-                            + Añadir Sonido
-                            <input type="file" id="sound-upload" accept="audio/*" class="hidden" onchange="addNewSound(this)">
-                        </label>
+                        <h2 class="text-xl font-semibold text-pink-200">🎵 Mis Sonidos</h2>
+                        <button onclick="document.getElementById('audio-upload').click()" class="btn-primary px-4 py-2 rounded-lg text-sm">+ Añadir</button>
+                        <input type="file" id="audio-upload" class="hidden" accept="audio/*" onchange="addNewSound(event)">
                     </div>
-                    <div id="sound-board" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4"></div>
-                </div>
-                <div id="resume-toast" class="hidden mt-4 bg-pink-500/20 border border-pink-500/50 p-3 rounded-lg flex justify-between items-center">
-                    <span class="text-sm">¿Continuar donde te quedaste?</span>
-                    <button onclick="resumePlayback()" class="bg-pink-500 text-white px-3 py-1 rounded text-xs font-bold">Sí</button>
-                </div>
-            </section>
+                    <div id="sound-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"></div>
+                    <div id="no-sounds-msg" class="text-center py-10 text-slate-500 hidden">No hay sonidos cargados.</div>
+                </section>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- POLIFILL PARA LOCALSTORAGE (Evita el error de seguridad) ---
-        const safeStorage = {
-            memory: {},
-            setItem(key, value) {
-                try {
-                    localStorage.setItem(key, value);
-                } catch (e) {
-                    this.memory[key] = value;
-                    console.warn("Navegador bloquea LocalStorage. Guardando solo en sesión actual.");
-                }
-            },
-            getItem(key) {
-                try {
-                    return localStorage.getItem(key) || this.memory[key] || null;
-                } catch (e) {
-                    return this.memory[key] || null;
-                }
-            },
-            clear() {
-                try { localStorage.clear(); } catch(e) {}
-                this.memory = {};
+        const DEFAULT_VIDEO = 'ou2JKwDHYhw';
+        let history = [];
+        let sounds = [];
+        let autoCam = false;
+        let player;
+
+        window.onload = function() {
+            const consent = localStorage.getItem('waffly_consent');
+            const skipModal = localStorage.getItem('waffly_skip_modal');
+            const hasData = localStorage.getItem('waffly_history') || localStorage.getItem('waffly_custom_sounds') || localStorage.getItem('waffly_notes');
+
+            if (!consent) document.getElementById('cookie-banner').classList.remove('translate-y-full');
+
+            if (hasData && !skipModal) {
+                document.getElementById('session-modal').classList.remove('hidden');
+            } else if (skipModal === 'reset') {
+                sessionAction('reset', true);
+            } else {
+                loadAppData();
             }
         };
 
-        let stream = null;
-        let player = null;
-        let lastPosition = 0;
-        let currentVideoId = "ou2JKwDHYhw";
-        const videoElement = document.getElementById('webcam');
-        const placeholder = document.getElementById('camera-placeholder');
-
-        const defaultSounds = [
-            { id: 'duck', name: 'Pato 🦆', freq: 440 },
-            { id: 'cat', name: 'Gato 🐱', freq: 880 }
-        ];
-
-        let userSounds = [];
-        let audioCtx = null;
-
-        function resumeAudioContext() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-        }
-
-        function playTone(freq, duration = 0.2) {
-            resumeAudioContext();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            osc.connect(gain).connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + duration);
-        }
-
-        function checkAppStorage() {
-            if (safeStorage.getItem('cookies-accepted') !== 'true') {
-                document.getElementById('cookie-banner').style.display = 'block';
+        function loadAppData() {
+            history = JSON.parse(localStorage.getItem('waffly_history') || '[]');
+            
+            if (history.length === 0) {
+                history.push(DEFAULT_VIDEO);
+                localStorage.setItem('waffly_history', JSON.stringify(history));
             }
 
-            const hasData = safeStorage.getItem('user-notes') || 
-                            safeStorage.getItem('video-history') || 
-                            safeStorage.getItem('user-sounds');
+            sounds = JSON.parse(localStorage.getItem('waffly_custom_sounds') || '[]');
+            document.getElementById('notes').value = localStorage.getItem('waffly_notes') || '';
+            autoCam = localStorage.getItem('waffly_auto_cam') === 'true';
             
-            if (hasData) {
-                document.getElementById('restore-modal').classList.remove('hidden');
+            if (autoCam) startCamera();
+            renderSounds();
+            updateHistoryUI();
+        }
+
+        function sessionAction(type, silent = false) {
+            const skip = document.getElementById('skip-modal').checked;
+            if (type === 'reset') {
+                clearLocalStorageAll();
+                if (skip) localStorage.setItem('waffly_skip_modal', 'reset');
             } else {
-                initApp(false);
+                if (skip) localStorage.setItem('waffly_skip_modal', 'continue');
+            }
+            if (!silent) document.getElementById('session-modal').classList.add('hidden');
+            loadAppData();
+        }
+
+        function factoryReset() {
+            if(confirm("¿Estás seguro? Esto eliminará sonidos, miniaturas, historial y notas.")) {
+                clearLocalStorageAll();
+                location.reload();
             }
         }
 
-        function confirmRestore(shouldRestore) {
-            document.getElementById('restore-modal').classList.add('hidden');
-            if (!shouldRestore) {
-                safeStorage.clear();
-                document.getElementById('cookie-banner').style.display = 'block';
-            }
-            initApp(shouldRestore);
+        function clearLocalStorageAll() {
+            localStorage.clear();
         }
 
-        function initApp(load) {
-            if (load) {
-                try {
-                    userSounds = JSON.parse(safeStorage.getItem('user-sounds') || '[]');
-                } catch(e) { userSounds = []; }
-                document.getElementById('user-notes').value = safeStorage.getItem('user-notes') || "";
-                currentVideoId = safeStorage.getItem('current-video-id') || currentVideoId;
-            }
-            loadYouTubeScript();
-            renderSoundBoard();
-            updateHistoryList();
+        function acceptCookies() {
+            localStorage.setItem('waffly_consent', 'true');
+            document.getElementById('cookie-banner').classList.add('translate-y-full');
+            loadAppData();
         }
 
-        // --- YOUTUBE FIX PARA ERROR 153 Y EJECUCIÓN LOCAL ---
-        function loadYouTubeScript() {
-            if (!window.YT) {
-                const tag = document.createElement('script');
-                tag.src = "https://www.youtube.com/iframe_api";
-                const firstScriptTag = document.getElementsByTagName('script')[0];
-                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-            } else {
-                // Pequeña espera para asegurar que la API está realmente lista
-                setTimeout(onYouTubeIframeAPIReady, 500);
-            }
-        }
+        function toggleSettings() { document.getElementById('settings-modal').classList.toggle('hidden'); }
 
-        function onYouTubeIframeAPIReady() {
-            if (player || typeof YT === 'undefined' || !YT.Player) return;
-            
-            // Forzar el origen a https://www.youtube.com para evitar el error 153 en entornos file:// o sandboxed
-            const host = "https://www.youtube.com";
-            
-            player = new YT.Player('yt-player-container', {
-                height: '100%',
-                width: '100%',
-                videoId: currentVideoId,
-                playerVars: { 
-                    'autoplay': 0,
-                    'rel': 0,
-                    'showinfo': 0,
-                    'origin': location.origin === 'null' ? host : location.origin,
-                    'widget_referrer': host,
-                    'enablejsapi': 1
-                },
-                events: { 
-                    'onReady': onPlayerReady, 
-                    'onError': (e) => {
-                        console.error("Error YT:", e.data);
-                        // Si falla con error de origen, intentar recargar sin el parámetro origin
-                        if (e.data === 153 || e.data === 101) {
-                            console.warn("Reintentando carga sin origin por error 153...");
-                        }
-                    } 
-                }
+        // --- Gestión de Sonidos ---
+        function renderSounds() {
+            const grid = document.getElementById('sound-grid');
+            const msg = document.getElementById('no-sounds-msg');
+            grid.innerHTML = '';
+            if (sounds.length === 0) { msg.classList.remove('hidden'); return; }
+            msg.classList.add('hidden');
+            sounds.forEach((sound, index) => {
+                const div = document.createElement('div');
+                div.className = "sound-card relative group bg-slate-700 rounded-xl p-4 border border-slate-600 hover:bg-slate-600 transition-all";
+                div.innerHTML = `
+                    <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="playCustomSound(${index})">
+                        <span class="text-3xl">🔊</span>
+                        <span class="text-sm font-medium truncate w-full text-center">${sound.name}</span>
+                    </div>
+                    <div class="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100">
+                        <button onclick="editSound(${index})" class="p-1 bg-slate-800 rounded text-[10px]">✏️</button>
+                        <button onclick="deleteSound(${index})" class="p-1 bg-slate-800 rounded text-[10px]">✕</button>
+                    </div>`;
+                grid.appendChild(div);
             });
         }
-
-        function onPlayerReady() {
-            const savedTime = safeStorage.getItem(`pos_${currentVideoId}`);
-            if (savedTime && parseFloat(savedTime) > 5) {
-                lastPosition = parseFloat(savedTime);
-                document.getElementById('resume-toast').classList.remove('hidden');
-            }
-            setInterval(() => {
-                if (player && player.getPlayerState?.() === 1) {
-                    safeStorage.setItem(`pos_${currentVideoId}`, player.getCurrentTime());
-                }
-            }, 5000);
-        }
-
-        function resumePlayback() {
-            if (player && lastPosition > 0) { player.seekTo(lastPosition); player.playVideo(); }
-            document.getElementById('resume-toast').classList.add('hidden');
-        }
-
-        function changeVideo(id = null) {
-            let val = id || document.getElementById('video-url').value;
-            let vid = id;
-            if (!id) {
-                if (val.includes('v=')) vid = val.split('v=')[1].split('&')[0];
-                else if (val.includes('youtu.be/')) vid = val.split('youtu.be/')[1].split(/[?#]/)[0];
-                else vid = val;
-            }
-            if (vid && vid.length > 5) {
-                currentVideoId = vid;
-                if (player && player.loadVideoById) {
-                    player.loadVideoById(vid);
-                    safeStorage.setItem('current-video-id', vid);
-                    saveToHistory(vid);
-                } else {
-                    // Si el reproductor no se inicializó, reintentar
-                    onYouTubeIframeAPIReady();
-                }
-            }
-        }
-
-        // --- SONIDOS ---
-        function renderSoundBoard() {
-            const board = document.getElementById('sound-board');
-            const all = [...defaultSounds, ...userSounds];
-            board.innerHTML = all.map(s => `
-                <div class="relative group">
-                    <button onclick="playSound('${s.id}')" class="sound-btn w-full py-4 px-2 bg-slate-800 border border-slate-700 rounded-xl hover:bg-slate-700 transition-all text-sm font-bold truncate">
-                        ${s.type === 'file' ? '🎵' : '🎹'} ${s.name}
-                    </button>
-                    ${s.id.startsWith('c_') ? `
-                        <div class="absolute -top-2 -right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onclick="deleteSound('${s.id}')" class="bg-red-500 w-6 h-6 rounded-full text-[10px] flex items-center justify-center">✕</button>
-                        </div>
-                    ` : ''}
-                </div>`).join('');
-        }
-
-        function playSound(id) {
-            if (id === 'duck') playTone(440);
-            else if (id === 'cat') { playTone(880, 0.1); setTimeout(() => playTone(1100), 100); }
-            else {
-                const s = userSounds.find(u => u.id === id);
-                if (s?.data) {
-                    const audio = new Audio(s.data);
-                    audio.play().catch(e => console.warn("Error audio local:", e));
-                }
-            }
-        }
-
-        function addNewSound(input) {
-            const file = input.files[0];
+        async function addNewSound(e) {
+            const file = e.target.files[0];
             if (!file) return;
-            const name = prompt("Nombre:", file.name.split('.')[0]);
-            if (!name) return;
             const reader = new FileReader();
-            reader.onload = (e) => {
-                if (e.target.result.length > 1500000) return alert("Archivo muy pesado para modo local.");
-                userSounds.push({ id: 'c_'+Date.now(), name, type: 'file', data: e.target.result });
-                safeStorage.setItem('user-sounds', JSON.stringify(userSounds));
-                renderSoundBoard();
+            reader.onload = (ev) => {
+                sounds.push({ name: file.name.split('.')[0], data: ev.target.result });
+                localStorage.setItem('waffly_custom_sounds', JSON.stringify(sounds));
+                renderSounds();
             };
             reader.readAsDataURL(file);
         }
+        function playCustomSound(i) { new Audio(sounds[i].data).play(); }
+        function deleteSound(i) { sounds.splice(i, 1); localStorage.setItem('waffly_custom_sounds', JSON.stringify(sounds)); renderSounds(); }
+        function editSound(i) { const n = prompt("Nombre:", sounds[i].name); if(n){ sounds[i].name=n; localStorage.setItem('waffly_custom_sounds', JSON.stringify(sounds)); renderSounds(); }}
 
-        function deleteSound(id) {
-            userSounds = userSounds.filter(u => u.id !== id);
-            safeStorage.setItem('user-sounds', JSON.stringify(userSounds));
-            renderSoundBoard();
+        // --- YouTube ---
+        const tag = document.createElement('script'); tag.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(tag);
+        function onYouTubeIframeAPIReady() {
+            const lastId = history.length > 0 ? history[history.length - 1] : DEFAULT_VIDEO;
+            player = new YT.Player('player', { height: '100%', width: '100%', videoId: lastId });
         }
-
-        // --- CÁMARA Y NOTAS ---
-        async function startCamera() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                videoElement.srcObject = stream;
-                placeholder.classList.add('hidden');
-            } catch (err) { 
-                placeholder.classList.remove('hidden');
-                placeholder.textContent = "Acceso denegado o error de seguridad local.";
+        function changeVideo(id = null) {
+            let vId = id;
+            if(!vId) {
+                const input = document.getElementById('video-url').value;
+                if (input.includes('v=')) vId = input.split('v=')[1].split('&')[0];
+                else if (input.includes('youtu.be/')) vId = input.split('youtu.be/')[1];
+                else vId = input;
+            }
+            if (vId && vId.length >= 11) {
+                player.loadVideoById(vId);
+                // Mover al principio si ya existe, o añadir si es nuevo
+                history = history.filter(item => item !== vId);
+                history.push(vId);
+                localStorage.setItem('waffly_history', JSON.stringify(history));
+                updateHistoryUI();
+                document.getElementById('video-url').value = '';
             }
         }
 
+        // --- Historial con Miniaturas ---
+        function updateHistoryUI() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = history.slice().reverse().map((id, i) => `
+                <div class="history-item relative group flex gap-3 p-2 bg-slate-900/50 rounded-xl hover:bg-slate-700/50 transition-all border border-transparent hover:border-pink-500/30">
+                    <div class="w-24 aspect-video rounded-lg overflow-hidden flex-shrink-0 cursor-pointer shadow-lg" onclick="changeVideo('${id}')">
+                        <img src="https://img.youtube.com/vi/${id}/mqdefault.jpg" class="w-full h-full object-cover" alt="Miniatura">
+                    </div>
+                    <div class="flex flex-col justify-center flex-1 min-w-0 pr-6">
+                        <span class="text-[10px] font-mono text-slate-500 truncate mb-1">ID: ${id}</span>
+                        <button onclick="changeVideo('${id}')" class="text-xs font-bold text-pink-100 hover:text-pink-300 transition-colors text-left truncate">
+                            Ver video
+                        </button>
+                    </div>
+                    <button onclick="removeFromHistory(${history.length - 1 - i})" class="delete-btn opacity-0 absolute top-2 right-2 text-slate-500 hover:text-red-400 transition-opacity">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>`).join('');
+        }
+
+        function removeFromHistory(i) { history.splice(i,1); localStorage.setItem('waffly_history', JSON.stringify(history)); updateHistoryUI(); }
+        function clearHistory() { history = [DEFAULT_VIDEO]; localStorage.setItem('waffly_history', JSON.stringify(history)); updateHistoryUI(); }
+        function toggleHistory() { document.getElementById('history-sidebar').classList.toggle('translate-x-full'); }
+
+        // --- Cámara ---
+        async function startCamera() {
+            try {
+                const s = await navigator.mediaDevices.getUserMedia({ video: true });
+                document.getElementById('webcam').srcObject = s;
+                document.getElementById('cam-msg').classList.add('hidden');
+                localStorage.setItem('waffly_auto_cam', 'true');
+            } catch (e) {}
+        }
         function stopCamera() {
-            if (stream) { stream.getTracks().forEach(t => t.stop()); videoElement.srcObject = null; placeholder.classList.remove('hidden'); }
+            const v = document.getElementById('webcam');
+            if(v.srcObject) v.srcObject.getTracks().forEach(t => t.stop());
+            v.srcObject = null;
+            document.getElementById('cam-msg').classList.remove('hidden');
+            localStorage.setItem('waffly_auto_cam', 'false');
         }
-
-        function saveNotes() { safeStorage.setItem('user-notes', document.getElementById('user-notes').value); }
-        function acceptCookies() { safeStorage.setItem('cookies-accepted', 'true'); document.getElementById('cookie-banner').style.display = 'none'; }
-        function saveToHistory(id) {
-            let h = [];
-            try { h = JSON.parse(safeStorage.getItem('video-history') || '[]'); } catch(e) {}
-            h = [id, ...h.filter(x => x !== id)].slice(0, 10);
-            safeStorage.setItem('video-history', JSON.stringify(h));
-            updateHistoryList();
-        }
-
-        function updateHistoryList() {
-            let h = [];
-            try { h = JSON.parse(safeStorage.getItem('video-history') || '[]'); } catch(e) {}
-            document.getElementById('history-list').innerHTML = h.map(id => `
-                <div onclick="changeVideo('${id}')" class="p-2 bg-slate-900 rounded cursor-pointer hover:bg-pink-500/10 text-xs truncate">ID: ${id}</div>
-            `).join('');
-        }
-
-        function toggleHistory() { document.getElementById('history-panel').classList.toggle('open'); }
-        function resetAllData() { if (confirm("¿Borrar todo?")) { safeStorage.clear(); location.reload(); } }
-
-        window.onload = checkAppStorage;
+        function saveNotes() { localStorage.setItem('waffly_notes', document.getElementById('notes').value); }
     </script>
 </body>
 </html>
