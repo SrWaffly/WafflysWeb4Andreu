@@ -19,9 +19,7 @@
             100% { box-shadow: inset 0 0 0 0px #fbcfe8; }
         }
 
-        .flash-active {
-            animation: flashBorder 0.4s ease-out forwards;
-        }
+        .flash-active { animation: flashBorder 0.4s ease-out forwards; }
         
         .emoji-animated {
             font-size: 80px;
@@ -33,9 +31,10 @@
         #video-container, #drawing-container {
             position: relative;
             background: #111;
-            border-radius: 16px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.05);
         }
         
         video {
@@ -45,42 +44,44 @@
             transform: scaleX(-1);
         }
 
-        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scroll::-webkit-scrollbar-track { background: #1e293b; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #0f172a; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; border: 2px solid #0f172a; }
 
         .btn-primary {
             background-color: #fbcfe8;
             color: #1e293b;
             font-weight: bold;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
         }
 
         .btn-primary:hover {
             background-color: #f9a8d4;
-            transform: translateY(-2px);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(251, 207, 232, 0.3);
         }
 
         .modal-overlay {
-            background-color: rgba(0,0,0,0.92);
-            backdrop-filter: blur(8px);
+            background-color: rgba(2, 6, 23, 0.95);
+            backdrop-filter: blur(12px);
         }
 
         #dynamic-clock {
             font-family: 'ui-monospace', monospace;
-            letter-spacing: -0.05em;
             position: fixed;
             top: 1.5rem;
             left: 1.5rem;
             z-index: 60;
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(12px);
-            padding: 0.6rem 1.4rem;
-            border-radius: 24px;
-            border: 1px solid rgba(251, 207, 232, 0.2);
-            font-size: 1.25rem;
-            font-weight: 600;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            padding: 0.8rem 1.6rem;
+            border-radius: 30px;
+            border: 1px solid rgba(251, 207, 232, 0.3);
+            font-size: 1.4rem;
+            font-weight: 700;
             color: #fbcfe8;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
 
         .sidebar {
@@ -88,595 +89,574 @@
             top: 0;
             right: 0;
             height: 100%;
-            width: 320px;
+            width: 350px;
             background: #1e293b;
             z-index: 100;
             transform: translateX(100%);
-            transition: transform 0.3s ease;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -20px 0 50px rgba(0,0,0,0.5);
             border-left: 1px solid #334155;
-            display: flex; flex-direction: column; padding: 1.5rem;
+            display: flex; flex-direction: column; padding: 2rem;
         }
 
         .sidebar.open { transform: translateX(0); }
 
         .gallery-item {
             flex: 0 0 auto;
-            width: 220px;
+            width: 280px;
             aspect-ratio: 16/9;
             position: relative;
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
             border: 2px solid #334155;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.4s ease;
             cursor: pointer;
+            background: #0f172a;
         }
-        .gallery-item:hover { 
-            border-color: #fbcfe8; 
-            transform: scale(1.08);
-            z-index: 20;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        
+        .gallery-item:hover {
+            transform: scale(1.05) translateY(-5px);
+            border-color: #fbcfe8;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
         }
+
+        .gallery-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            padding: 10px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .gallery-item:hover .gallery-controls { opacity: 1; }
 
         #save-indicator {
             position: fixed;
             top: 0;
-            right: 1.5rem;
+            right: 2rem;
             z-index: 250;
             background: #10b981;
             color: white;
-            padding: 0.75rem 1.5rem;
-            border-bottom-left-radius: 16px;
-            border-bottom-right-radius: 16px;
-            font-size: 13px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            padding: 1rem 2rem;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            font-size: 14px;
+            font-weight: 800;
             transform: translateY(-200%); 
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             pointer-events: none;
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
         }
-        #save-indicator.show {
-            transform: translateY(0);
-        }
+        #save-indicator.show { transform: translateY(0); }
 
         .chat-bubble {
             max-width: 85%;
-            padding: 0.75rem 1rem;
-            border-radius: 1rem;
-            font-size: 0.875rem;
-            line-height: 1.25rem;
-            margin-bottom: 0.5rem;
+            padding: 1rem 1.25rem;
+            border-radius: 1.25rem;
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+            word-wrap: break-word;
+            line-height: 1.5;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .chat-user {
-            background-color: #334155;
-            color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: 0.25rem;
+        .chat-user { background-color: #334155; color: white; align-self: flex-end; border-bottom-right-radius: 0.25rem; }
+        .chat-ai { background-color: #fbcfe8; color: #1e293b; align-self: flex-start; border-bottom-left-radius: 0.25rem; }
+
+        #modal-img {
+            transition: transform 0.3s ease;
+            cursor: zoom-in;
         }
-        .chat-ai {
-            background-color: #fbcfe8;
-            color: #1e293b;
-            align-self: flex-start;
-            border-bottom-left-radius: 0.25rem;
+        #modal-img.zoomed {
+            transform: scale(2);
+            cursor: zoom-out;
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 overflow-x-hidden transition-all duration-300" id="main-body">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8 overflow-x-hidden selection:bg-pink-500/30" id="main-body">
 
-    <div id="save-indicator">
-        <span>✅</span> Cambios guardados
-    </div>
+    <div id="save-indicator"><span>✨</span> ¡Acción realizada con éxito!</div>
+    <div id="dynamic-clock">00:00:00</div>
 
-    <div id="dynamic-clock">00:00</div>
-
-    <div class="max-w-6xl mx-auto space-y-8 relative">
-        <header class="text-center relative pt-4">
+    <div class="max-w-7xl mx-auto space-y-12 relative">
+        <header class="text-center relative pt-8 pb-4">
             <div class="emoji-animated">🐱</div>
-            <h1 class="text-4xl font-bold mt-2 text-pink-200">Sr.Waffly's Place</h1>
-            <p class="text-[10px] text-slate-500 mt-1 uppercase tracking-widest font-mono">v2.9.4 • GitHub Hosted & Live Assistant</p>
-            <div class="absolute right-0 top-1/2 -translate-y-1/2 flex gap-2">
-                <button onclick="toggleSidebar('notes-history-sidebar')" class="bg-slate-800 p-3 rounded-full hover:bg-slate-700 border border-slate-700 shadow-lg">📝</button>
-                <button onclick="toggleSidebar('history-sidebar')" class="bg-slate-800 p-3 rounded-full hover:bg-slate-700 border border-slate-700 shadow-lg">🕒</button>
-                <button onclick="toggleSettings()" class="bg-slate-800 p-3 rounded-full hover:bg-slate-700 border border-slate-700 shadow-lg">⚙️</button>
+            <h1 class="text-5xl font-black mt-4 text-pink-200 tracking-tighter">Sr.Waffly's Place</h1>
+            <p class="text-xs text-slate-500 mt-2 uppercase tracking-[0.3em] font-mono font-bold">v2.9.9 • Fix: Gallery Management</p>
+            
+            <div class="absolute right-0 top-1/2 -translate-y-1/2 flex gap-3">
+                <button title="Archivo de Notas" onclick="toggleSidebar('notes-history-sidebar')" class="bg-slate-800 p-4 rounded-2xl hover:bg-slate-700 border border-slate-700 shadow-2xl transition-all hover:scale-110 active:scale-95">📝</button>
+                <button title="Historial de Vídeos" onclick="toggleSidebar('history-sidebar')" class="bg-slate-800 p-4 rounded-2xl hover:bg-slate-700 border border-slate-700 shadow-2xl transition-all hover:scale-110 active:scale-95">🕒</button>
+                <button title="Ajustes" onclick="toggleSettings()" class="bg-slate-800 p-4 rounded-2xl hover:bg-slate-700 border border-slate-700 shadow-2xl transition-all hover:scale-110 active:scale-95">⚙️</button>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <!-- CÁMARA -->
-            <div class="lg:col-span-2">
-                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl relative overflow-hidden">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold text-pink-200 flex items-center gap-2">📷 Cámara</h2>
-                        <button id="full-cam-btn" onclick="openCamFull()" class="hidden bg-pink-500/10 text-pink-200 px-3 py-1 rounded-full border border-pink-500/20 hover:bg-pink-500/30 text-xs transition-all">Ver en Grande ⤢</button>
+            <div class="lg:col-span-8">
+                <section class="bg-slate-900 p-8 rounded-[32px] border border-slate-800 shadow-2xl relative overflow-hidden group">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-pink-200 flex items-center gap-3">
+                            <span class="p-2 bg-pink-500/10 rounded-lg text-xl">📷</span> Cámara de Waffly
+                        </h2>
+                        <button id="full-cam-btn" onclick="openCamFull()" class="hidden bg-pink-500/10 text-pink-200 px-4 py-2 rounded-full border border-pink-500/20 hover:bg-pink-500/30 text-sm font-bold transition-all">Modo Cine ⤢</button>
                     </div>
                     <div id="video-container" class="aspect-video">
-                        <video id="webcam" autoplay playsinline></video>
-                        <div id="cam-msg" class="absolute inset-0 flex items-center justify-center text-slate-500">Cámara Apagada</div>
+                        <video id="webcam" autoplay playsinline class="mirror"></video>
+                        <div id="cam-msg" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 bg-slate-900/80">
+                            <span class="text-4xl mb-2">🎥</span>
+                            <span class="font-bold">Cámara Apagada</span>
+                        </div>
                     </div>
-                    <div class="mt-4 flex gap-3">
-                        <button onclick="startCamera()" class="btn-primary flex-1 py-3 rounded-xl">Activar</button>
-                        <button onclick="takeSnapshot()" id="snap-btn" class="bg-pink-500/20 hover:bg-pink-500/40 border border-pink-500/30 text-pink-100 px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-30" disabled>Capturar</button>
-                        <button onclick="stopCamera()" class="bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-xl font-bold">Apagar</button>
+                    <div class="mt-6 flex gap-4">
+                        <button onclick="startCamera()" class="btn-primary flex-1 py-4 rounded-2xl text-lg">Activar Lente</button>
+                        <button onclick="takeSnapshot()" id="snap-btn" class="bg-pink-500/20 hover:bg-pink-500/40 border border-pink-500/30 text-pink-100 px-8 py-4 rounded-2xl font-bold transition-all disabled:opacity-20 flex items-center gap-2" disabled>
+                            📸 Capturar
+                        </button>
+                        <button onclick="stopCamera()" class="bg-slate-800 hover:bg-red-500/20 hover:text-red-300 border border-slate-700 px-8 py-4 rounded-2xl font-bold transition-all">Apagar</button>
                     </div>
                 </section>
             </div>
 
             <!-- NOTAS -->
-            <div class="lg:col-span-1">
-                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl h-full flex flex-col">
-                    <h2 class="text-xl font-semibold mb-4 text-pink-200">📝 Notas</h2>
-                    <textarea id="notes" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-4 text-slate-200 focus:outline-none resize-none custom-scroll mb-4" placeholder="Escribe aquí..."></textarea>
-                    <div class="flex gap-2">
-                        <button onclick="archiveNote()" class="flex-1 btn-primary py-2 rounded-lg text-sm">Archivar</button>
-                        <button onclick="clearCurrentNote()" class="px-4 py-2 bg-slate-700 hover:bg-red-500/20 text-slate-300 rounded-lg text-sm border border-slate-600">Borrar</button>
+            <div class="lg:col-span-4">
+                <section class="bg-slate-900 p-8 rounded-[32px] border border-slate-800 shadow-2xl h-full flex flex-col">
+                    <h2 class="text-2xl font-bold mb-6 text-pink-200 flex items-center gap-3">
+                        <span class="p-2 bg-blue-500/10 rounded-lg text-xl">📝</span> Notas Rápidas
+                    </h2>
+                    <textarea id="notes" class="flex-1 bg-slate-950 border border-slate-800 rounded-2xl p-6 text-slate-200 focus:outline-none focus:border-pink-500/50 resize-none custom-scroll mb-6 text-lg leading-relaxed shadow-inner" placeholder="Escribe tus pensamientos aquí..."></textarea>
+                    <div class="flex gap-3">
+                        <button onclick="archiveNote()" class="flex-1 btn-primary py-4 rounded-xl font-bold">Archivar</button>
+                        <button onclick="clearCurrentNote()" class="px-6 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold border border-slate-700 transition-all">Limpiar</button>
                     </div>
                 </section>
             </div>
 
             <!-- REPRODUCTOR -->
-            <div class="lg:col-span-3">
-                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                        <h2 class="text-xl font-semibold text-pink-200">📺 Reproductor</h2>
-                        <div class="flex w-full md:w-auto gap-2">
-                            <input type="text" id="video-url" placeholder="YouTube URL..." class="bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm w-full md:w-80 outline-none">
-                            <button onclick="changeVideo()" class="btn-primary px-6 py-2 rounded-lg">Cargar</button>
+            <div class="lg:col-span-12">
+                <section class="bg-slate-900 p-8 rounded-[32px] border border-slate-800 shadow-2xl">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
+                        <h2 class="text-2xl font-bold text-pink-200 flex items-center gap-3">
+                            <span class="p-2 bg-red-500/10 rounded-lg text-xl">📺</span> Sala de Cine
+                        </h2>
+                        <div class="flex w-full md:w-auto gap-3">
+                            <input type="text" id="video-url" placeholder="Pega el enlace de YouTube aquí..." class="bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-sm w-full md:w-96 outline-none focus:border-pink-500/50 transition-all shadow-inner">
+                            <button onclick="changeVideo()" class="btn-primary px-8 py-4 rounded-2xl whitespace-nowrap">Cargar Vídeo</button>
                         </div>
                     </div>
-                    <div class="aspect-video w-full max-w-5xl mx-auto rounded-xl overflow-hidden bg-black shadow-inner">
+                    <div class="aspect-video w-full max-w-6xl mx-auto rounded-3xl overflow-hidden bg-black shadow-2xl ring-1 ring-white/10">
                         <div id="player"></div>
                     </div>
                 </section>
             </div>
 
             <!-- DIBUJO -->
-            <div class="lg:col-span-2">
-                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl h-full">
-                    <h2 class="text-xl font-semibold mb-4 text-pink-200">🎨 Dibujo</h2>
+            <div class="lg:col-span-8">
+                <section class="bg-slate-900 p-8 rounded-[32px] border border-slate-800 shadow-2xl h-full">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-pink-200 flex items-center gap-3">
+                            <span class="p-2 bg-purple-500/10 rounded-lg text-xl">🎨</span> Lienzo Creativo
+                        </h2>
+                        <div class="flex items-center gap-4 bg-slate-950 px-4 py-2 rounded-2xl border border-slate-800">
+                            <label class="text-xs font-bold text-slate-500 uppercase">Color:</label>
+                            <input type="color" id="draw-color" value="#ec4899" class="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-none">
+                            <div class="h-6 w-[1px] bg-slate-800"></div>
+                            <label class="text-xs font-bold text-slate-500 uppercase">Grosor:</label>
+                            <input type="range" id="brush-size" min="1" max="50" value="5" class="accent-pink-500">
+                        </div>
+                    </div>
                     <div id="drawing-container" class="w-full aspect-video bg-white">
                         <canvas id="drawing-pad" class="w-full h-full" style="background: white; cursor: crosshair; touch-action: none;"></canvas>
                     </div>
-                    <div class="mt-4 flex gap-3 items-center">
-                        <input type="color" id="draw-color" value="#ec4899" class="w-12 h-12 rounded cursor-pointer bg-transparent">
-                        <button onclick="clearCanvas()" class="bg-slate-700 hover:bg-red-500/20 text-slate-300 px-6 py-3 rounded-xl font-bold border border-slate-600">Limpiar</button>
-                        <button onclick="saveDrawing()" class="btn-primary px-6 py-3 rounded-xl flex-1">Guardar</button>
+                    <div class="mt-6 flex gap-4 items-center">
+                        <button onclick="clearCanvas()" class="bg-slate-800 hover:bg-red-500/20 text-slate-300 px-8 py-4 rounded-2xl font-bold border border-slate-700 transition-all">Limpiar Lienzo</button>
+                        <button onclick="saveDrawing()" class="btn-primary px-8 py-4 rounded-2xl flex-1 text-lg">Guardar Obra Maestra</button>
                     </div>
                 </section>
             </div>
 
             <!-- SONIDOS -->
-            <div class="lg:col-span-1">
-                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl h-full flex flex-col">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-semibold text-pink-200">🎵 Sonidos</h2>
-                        <button onclick="document.getElementById('audio-upload').click()" class="text-pink-300 text-xs hover:underline">+ Añadir</button>
+            <div class="lg:col-span-4">
+                <section class="bg-slate-900 p-8 rounded-[32px] border border-slate-800 shadow-2xl h-full flex flex-col">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-2xl font-bold text-pink-200 flex items-center gap-3">
+                            <span class="p-2 bg-green-500/10 rounded-lg text-xl">🎵</span> Mesa de Mezclas
+                        </h2>
+                        <button onclick="document.getElementById('audio-upload').click()" class="bg-pink-500/10 text-pink-300 px-4 py-2 rounded-xl text-xs font-bold hover:bg-pink-500/20 transition-all border border-pink-500/20">+ Subir Audio</button>
                         <input type="file" id="audio-upload" class="hidden" accept="audio/*" onchange="addNewSound(event)">
                     </div>
-                    <div id="sound-grid" class="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto custom-scroll pr-1"></div>
+                    <div id="sound-grid" class="grid grid-cols-2 gap-4 max-h-[400px] overflow-y-auto custom-scroll pr-2"></div>
                 </section>
             </div>
 
-            <!-- GALERÍA -->
-            <div class="lg:col-span-3">
-                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-                    <h2 class="text-xl font-semibold text-pink-200 mb-6">🖼️ Galería</h2>
-                    <div id="gallery-carousel" class="flex gap-4 overflow-x-auto pb-8 pt-4 custom-scroll snap-x"></div>
-                    <div id="no-photos-msg" class="text-center py-12 text-slate-500 hidden italic">Sin capturas todavía...</div>
+            <!-- GALERÍA EXPANDIDA -->
+            <div class="lg:col-span-12">
+                <section class="bg-slate-900 p-8 rounded-[32px] border border-slate-800 shadow-2xl">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-2xl font-bold text-pink-200 flex items-center gap-3">
+                            <span class="p-2 bg-yellow-500/10 rounded-lg text-xl">🖼️</span> Galería de Waffly
+                        </h2>
+                        <span id="gallery-count" class="bg-slate-950 px-4 py-2 rounded-full border border-slate-800 text-xs font-bold text-slate-500">0 ELEMENTOS</span>
+                    </div>
+                    <div id="gallery-carousel" class="flex gap-6 overflow-x-auto pb-10 pt-4 custom-scroll snap-x"></div>
+                    <div id="no-photos-msg" class="text-center py-20 text-slate-600 italic">
+                        <div class="text-6xl mb-4 opacity-20">🌫️</div>
+                        <p class="text-lg">Tu galería está vacía... ¡Captura algo increíble!</p>
+                    </div>
                 </section>
             </div>
 
             <!-- ASISTENTE IA -->
-            <div class="lg:col-span-3">
-                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl flex flex-col h-[500px]">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-semibold text-pink-200 flex items-center gap-2">🤖 Asistente Waffly</h2>
-                        <button onclick="clearChat()" class="text-slate-500 text-[10px] hover:text-red-400">Limpiar Chat</button>
+            <div class="lg:col-span-12">
+                <section class="bg-slate-900 p-8 rounded-[32px] border border-slate-800 shadow-2xl flex flex-col h-[600px]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-pink-200 flex items-center gap-3">
+                            <span class="p-2 bg-indigo-500/10 rounded-lg text-xl">🤖</span> Charla con Waffly
+                        </h2>
+                        <button onclick="clearChat()" class="text-slate-500 text-xs font-bold hover:text-red-400 transition-colors uppercase tracking-widest">Borrar Conversación</button>
                     </div>
-                    <div id="chat-container" class="flex-1 overflow-y-auto custom-scroll flex flex-col p-4 space-y-3 bg-slate-900/50 rounded-xl mb-4 border border-slate-700/50">
-                        <div class="chat-bubble chat-ai">¡Miau! Ya estoy listo. ¿En qué puedo ayudarte hoy? 🐾</div>
+                    <div id="api-warning" class="hidden p-4 bg-red-900/20 border border-red-500/30 rounded-2xl text-red-200 text-sm mb-4 text-center">
+                        ⚠️ No has configurado tu API Key en Ajustes ⚙️. La IA está en modo offline.
                     </div>
-                    <div class="flex gap-2">
-                        <input type="text" id="chat-input" placeholder="Pregunta algo..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-4 text-sm focus:outline-none focus:border-pink-500 transition-all shadow-inner" onkeypress="if(event.key==='Enter') sendMessage()">
-                        <button onclick="sendMessage()" id="send-btn" class="btn-primary px-8 rounded-xl shadow-lg shadow-pink-500/10">Enviar</button>
+                    <div id="chat-container" class="flex-1 overflow-y-auto custom-scroll flex flex-col p-6 space-y-4 bg-slate-950 rounded-3xl mb-6 border border-slate-800 shadow-inner">
+                        <div class="chat-bubble chat-ai">¡Hola! Soy Waffly. Estoy listo para ayudarte a crear cosas asombrosas en tu rincón personal. 🐾</div>
+                    </div>
+                    <div class="flex gap-3">
+                        <input type="text" id="chat-input" placeholder="Escribe un mensaje aquí..." class="flex-1 bg-slate-950 border border-slate-800 rounded-2xl px-8 py-5 text-lg focus:outline-none focus:border-pink-500 transition-all shadow-inner" onkeypress="if(event.key==='Enter') sendMessage()">
+                        <button onclick="sendMessage()" id="send-btn" class="btn-primary px-12 rounded-2xl shadow-xl flex items-center gap-2">
+                            Enviar <span class="text-xl">🚀</span>
+                        </button>
                     </div>
                 </section>
             </div>
         </div>
     </div>
 
-    <!-- Modales -->
+    <!-- MODAL DE PREVISUALIZACIÓN -->
     <div id="preview-modal" class="fixed inset-0 z-[200] modal-overlay flex flex-col items-center justify-center p-4 hidden" onclick="closePreview()">
-        <button class="absolute top-6 right-6 text-white text-5xl">&times;</button>
-        <div class="max-w-5xl w-full h-auto max-h-[85vh] flex items-center justify-center bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10" onclick="event.stopPropagation()">
-            <img id="modal-img" class="max-w-full max-h-full object-contain hidden">
-            <video id="modal-video" class="max-w-full max-h-full object-contain hidden" autoplay playsinline></video>
+        <div class="absolute top-6 right-6 flex gap-4">
+            <button id="download-btn-modal" class="bg-blue-500 p-4 rounded-full text-white hover:bg-blue-600 transition-all shadow-xl" title="Descargar">💾</button>
+            <button id="delete-btn-modal" class="bg-red-500 p-4 rounded-full text-white hover:bg-red-600 transition-all shadow-xl" title="Borrar">🗑️</button>
+            <button onclick="closePreview()" class="bg-white/10 p-4 rounded-full text-white hover:bg-white/20 transition-all text-2xl leading-none">✕</button>
         </div>
-        <div class="flex gap-4 mt-6">
-            <button id="modal-download-btn" class="bg-white text-slate-900 px-6 py-2 rounded-full font-bold">⬇️ Descargar</button>
-            <p id="modal-caption" class="text-pink-200 text-xl font-bold bg-slate-800/80 px-6 py-2 rounded-full"></p>
+        
+        <div class="max-w-[90vw] w-full h-[80vh] flex items-center justify-center bg-black/50 rounded-[40px] overflow-hidden shadow-2xl ring-1 ring-white/10" onclick="event.stopPropagation()">
+            <img id="modal-img" class="max-w-full max-h-full object-contain hidden" onclick="toggleZoom()">
         </div>
+        
+        <div class="mt-8 bg-slate-800/80 backdrop-filter blur-xl px-10 py-4 rounded-full border border-white/10 shadow-2xl">
+            <p id="modal-caption" class="text-pink-100 text-lg font-black tracking-wide"></p>
+        </div>
+        <p class="text-slate-400 mt-4 text-xs uppercase tracking-widest font-bold">Haz clic en la imagen para activar/desactivar el Zoom</p>
     </div>
 
+    <!-- MODAL DE AJUSTES -->
     <div id="settings-modal" class="fixed inset-0 z-[110] modal-overlay flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-800 border border-slate-700 p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-6">
+        <div class="bg-slate-900 border border-slate-800 p-10 rounded-[40px] max-w-md w-full shadow-2xl space-y-8">
             <div class="text-center">
-                <span class="text-4xl">⚙️</span>
-                <h3 class="text-2xl font-bold text-white mt-4">Ajustes</h3>
+                <div class="text-5xl mb-4">⚙️</div>
+                <h3 class="text-3xl font-black text-white">Configuración</h3>
             </div>
-            <div class="space-y-4">
-                <div class="flex items-center justify-between p-4 bg-slate-900/50 rounded-xl border border-slate-700">
-                    <p class="text-sm font-bold text-pink-200">Mostrar Segundos</p>
+            
+            <div class="space-y-6">
+                <div class="space-y-2">
+                    <label class="text-xs font-black text-pink-300 uppercase tracking-widest">Gemini API Key</label>
+                    <input type="password" id="api-key-input" placeholder="Pega tu clave aquí..." class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white outline-none focus:border-pink-500/50 shadow-inner" onchange="saveApiKey()">
+                </div>
+                
+                <div class="flex items-center justify-between p-6 bg-slate-950 rounded-3xl border border-slate-800">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-black text-slate-200">Segundos en Reloj</span>
+                    </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="show-seconds-toggle" class="sr-only peer" onchange="toggleSecondsPreference()">
-                        <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:bg-pink-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                        <div class="w-14 h-8 bg-slate-800 rounded-full peer peer-checked:bg-pink-500 after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-6"></div>
                     </label>
                 </div>
-                <button onclick="factoryReset()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all">Borrar LocalStorage</button>
+
+                <div class="pt-4 border-t border-slate-800">
+                    <button onclick="factoryReset()" class="w-full bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white font-black py-4 rounded-2xl transition-all border border-red-500/20">RESETEAR TODO EL SISTEMA</button>
+                </div>
             </div>
-            <button onclick="toggleSettings()" class="w-full text-slate-400 text-sm hover:underline">Cerrar</button>
+            <button onclick="toggleSettings()" class="w-full text-slate-500 font-bold hover:text-white transition-colors">Cerrar Ajustes</button>
         </div>
     </div>
 
-    <!-- Sidebars -->
+    <!-- SIDEBARS -->
     <div id="history-sidebar" class="sidebar">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="font-bold text-pink-200">Historial Vídeos</h3>
-            <button onclick="toggleSidebar('history-sidebar')" class="text-slate-400 text-2xl">&times;</button>
+        <div class="flex justify-between items-center mb-8">
+            <h3 class="font-black text-pink-200 text-xl tracking-tighter">Historial de Vídeos</h3>
+            <button onclick="toggleSidebar('history-sidebar')" class="text-slate-400 text-3xl transition-transform hover:rotate-90">&times;</button>
         </div>
-        <div id="history-list" class="space-y-4 overflow-y-auto flex-1 custom-scroll pr-2"></div>
+        <div id="history-list" class="space-y-4 overflow-y-auto flex-1 custom-scroll pr-4"></div>
     </div>
 
     <div id="notes-history-sidebar" class="sidebar">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="font-bold text-pink-200">Archivo de Notas</h3>
-            <button onclick="toggleSidebar('notes-history-sidebar')" class="text-slate-400 text-2xl">&times;</button>
+        <div class="flex justify-between items-center mb-8">
+            <h3 class="font-black text-pink-200 text-xl tracking-tighter">Archivo de Notas</h3>
+            <button onclick="toggleSidebar('notes-history-sidebar')" class="text-slate-400 text-3xl transition-transform hover:rotate-90">&times;</button>
         </div>
-        <div id="notes-history-list" class="space-y-4 overflow-y-auto flex-1 custom-scroll pr-2"></div>
+        <div id="notes-history-list" class="space-y-4 overflow-y-auto flex-1 custom-scroll pr-4"></div>
     </div>
 
     <canvas id="snapshot-canvas" class="hidden"></canvas>
 
     <script>
-        const apiKey = ""; // La clave se inyecta automáticamente en el entorno de ejecución
+        let userApiKey = localStorage.getItem('waffly_api_key') || "";
         const DEFAULT_VIDEO = 'ou2JKwDHYhw';
-        let history = [], noteHistory = [], sounds = [], photos = [], chatHistory = [], showSeconds = false, player;
+        let history = [], noteHistory = [], sounds = [], photos = [], chatHistory = [], showSeconds = true;
+        let player, drawing = false;
 
-        async function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            const btn = document.getElementById('send-btn');
+        window.onload = () => {
+            history = JSON.parse(localStorage.getItem('waffly_history') || "[]");
+            noteHistory = JSON.parse(localStorage.getItem('waffly_note_history') || "[]");
+            photos = JSON.parse(localStorage.getItem('waffly_photos') || "[]");
+            sounds = JSON.parse(localStorage.getItem('waffly_custom_sounds') || "[]");
             
-            if (!text) return;
-
-            appendMessage('user', text);
-            input.value = '';
-            btn.disabled = true;
-            btn.innerText = '...';
-
-            chatHistory.push({ role: "user", parts: [{ text }] });
-            const systemPrompt = "Eres el asistente de Sr.Waffly's Place. Eres amable, creativo y te encantan los gatos. Ayudas con dibujos, notas o dudas. Responde de forma concisa y directa.";
-
-            // Endpoint y Modelo correctos para este entorno
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
-            const fetchWithRetry = async (retries = 5, delay = 1000) => {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: chatHistory,
-                            systemInstruction: { parts: [{ text: systemPrompt }] }
-                        })
-                    });
-                    if (!response.ok) throw new Error('API Error');
-                    return await response.json();
-                } catch (e) {
-                    if (retries > 0) {
-                        await new Promise(r => setTimeout(r, delay));
-                        return fetchWithRetry(retries - 1, delay * 2);
-                    }
-                    throw e;
-                }
-            };
-
-            try {
-                const data = await fetchWithRetry();
-                const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No puedo responder ahora mismo. 😿";
-                
-                appendMessage('ai', aiText);
-                chatHistory.push({ role: "model", parts: [{ text: aiText }] });
-                if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
-                
-                localStorage.setItem('waffly_chat_history', JSON.stringify(chatHistory));
-            } catch (err) {
-                appendMessage('ai', "Lo siento, ha habido un problema de conexión tras varios intentos. Inténtalo de nuevo más tarde. 🐾");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = 'Enviar';
-            }
-        }
-
-        // --- Funciones de utilidad y resto del script ---
-
-        function safeParse(key, defaultValue) {
-            try {
-                const item = localStorage.getItem(key);
-                if (!item) return defaultValue;
-                return JSON.parse(item);
-            } catch (e) {
-                console.error(`Error parsing ${key}:`, e);
-                return defaultValue;
-            }
-        }
-
-        function appendMessage(role, text) {
-            const container = document.getElementById('chat-container');
-            const div = document.createElement('div');
-            div.className = `chat-bubble ${role === 'user' ? 'chat-user' : 'chat-ai'}`;
-            div.innerText = text;
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function clearChat() {
-            chatHistory = [];
-            localStorage.removeItem('waffly_chat_history');
-            document.getElementById('chat-container').innerHTML = '<div class="chat-bubble chat-ai">Chat reiniciado. 🐾</div>';
-        }
-
-        function updateClock() {
-            const now = new Date();
-            const opts = { hour: '2-digit', minute: '2-digit', hour12: false };
-            if (showSeconds) opts.second = '2-digit';
-            const clockEl = document.getElementById('dynamic-clock');
-            if (clockEl) clockEl.innerText = now.toLocaleTimeString('es-ES', opts);
-        }
-        setInterval(updateClock, 1000);
-
-        function showSaveIndicator() {
-            const indicator = document.getElementById('save-indicator');
-            indicator.classList.add('show');
-            setTimeout(() => indicator.classList.remove('show'), 2000);
-        }
-
-        window.onload = function() {
-            showSeconds = localStorage.getItem('waffly_show_seconds') === 'true';
+            const savedSecs = localStorage.getItem('waffly_show_seconds');
+            showSeconds = savedSecs !== null ? savedSecs === 'true' : true;
             document.getElementById('show-seconds-toggle').checked = showSeconds;
-            loadAppData();
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
+            
+            checkApiWarning();
             updateClock();
+            updateHistoryUI();
+            updateNotesHistoryUI();
+            renderGallery();
+            renderSounds();
+            resizeCanvas();
+            
+            setInterval(updateClock, 1000);
+            window.addEventListener('resize', resizeCanvas);
         };
 
-        function loadAppData() {
-            history = safeParse('waffly_history', []);
-            noteHistory = safeParse('waffly_note_history', []);
-            sounds = safeParse('waffly_custom_sounds', []);
-            photos = safeParse('waffly_photos', []);
-            chatHistory = safeParse('waffly_chat_history', []);
-            
-            document.getElementById('notes').value = localStorage.getItem('waffly_current_note') || '';
-            if (!Array.isArray(history) || history.length === 0) history = [DEFAULT_VIDEO];
-            
-            renderSounds(); 
-            renderGallery(); 
-            updateHistoryUI(); 
-            updateNotesHistoryUI();
-            
-            if (chatHistory.length > 0) {
-                const container = document.getElementById('chat-container');
-                container.innerHTML = '';
-                chatHistory.forEach(msg => {
-                    const txt = msg.parts?.[0]?.text || "";
-                    if(txt) appendMessage(msg.role === 'user' ? 'user' : 'ai', txt);
-                });
-            }
+        // --- RELOJ ---
+        function updateClock() {
+            const now = new Date();
+            const format = { hour: '2-digit', minute: '2-digit', second: showSeconds ? '2-digit' : undefined, hour12: false };
+            document.getElementById('dynamic-clock').innerText = now.toLocaleTimeString('es-ES', format);
         }
 
-        const canvas = document.getElementById('drawing-pad');
-        const ctx = canvas.getContext('2d');
-        let painting = false;
-
-        function resizeCanvas() {
-            const container = document.getElementById('drawing-container');
-            if(!container) return;
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-            ctx.lineCap = 'round'; ctx.lineWidth = 4;
-        }
-
-        function startPosition(e) { painting = true; draw(e); }
-        function endPosition() { painting = false; ctx.beginPath(); }
-        function draw(e) {
-            if (!painting) return;
-            ctx.strokeStyle = document.getElementById('draw-color').value;
-            const rect = canvas.getBoundingClientRect();
-            const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-            const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
-            ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y);
-        }
-        canvas.addEventListener('mousedown', startPosition);
-        window.addEventListener('mouseup', endPosition);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startPosition(e.touches[0]); });
-        canvas.addEventListener('touchend', endPosition);
-        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); });
-        function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
-        function saveDrawing() { addPhotoToGallery(canvas.toDataURL('image/webp'), "Dibujo"); clearCanvas(); }
-
+        // --- CÁMARA ---
         async function startCamera() {
             try {
-                const s = await navigator.mediaDevices.getUserMedia({ video: true });
-                document.getElementById('webcam').srcObject = s;
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 1280, height: 720 } });
+                document.getElementById('webcam').srcObject = stream;
                 document.getElementById('cam-msg').classList.add('hidden');
                 document.getElementById('snap-btn').disabled = false;
                 document.getElementById('full-cam-btn').classList.remove('hidden');
-            } catch (e) {}
+            } catch (err) { alert("Error al acceder a la cámara: " + err.message); }
         }
+
         function stopCamera() {
-            const v = document.getElementById('webcam');
-            if(v.srcObject) v.srcObject.getTracks().forEach(t => t.stop());
-            v.srcObject = null;
+            const video = document.getElementById('webcam');
+            if (video.srcObject) { video.srcObject.getTracks().forEach(track => track.stop()); video.srcObject = null; }
             document.getElementById('cam-msg').classList.remove('hidden');
             document.getElementById('snap-btn').disabled = true;
             document.getElementById('full-cam-btn').classList.add('hidden');
         }
+
         function takeSnapshot() {
-            document.getElementById('main-body').classList.remove('flash-active'); void document.getElementById('main-body').offsetWidth; 
             document.getElementById('main-body').classList.add('flash-active');
+            setTimeout(() => document.getElementById('main-body').classList.remove('flash-active'), 400);
             const video = document.getElementById('webcam');
-            const snapCanvas = document.getElementById('snapshot-canvas');
-            const context = snapCanvas.getContext('2d');
-            snapCanvas.width = video.videoWidth; snapCanvas.height = video.videoHeight;
-            context.translate(snapCanvas.width, 0); context.scale(-1, 1);
-            context.drawImage(video, 0, 0, snapCanvas.width, snapCanvas.height);
-            addPhotoToGallery(snapCanvas.toDataURL('image/webp'), "Captura");
+            const canvas = document.getElementById('snapshot-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0);
+            addToGallery(canvas.toDataURL('image/webp', 0.9), "Captura Cámara");
         }
 
-        function addPhotoToGallery(url, type) {
-            const photoObj = { id: Date.now(), url: url, time: new Date().toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'}), label: type };
-            photos.unshift(photoObj);
-            localStorage.setItem('waffly_photos', JSON.stringify(photos.slice(0, 50)));
-            renderGallery(); showSaveIndicator();
+        // --- LIENZO ---
+        const pad = document.getElementById('drawing-pad');
+        const pctx = pad.getContext('2d');
+        function resizeCanvas() {
+            const container = document.getElementById('drawing-container');
+            pad.width = container.clientWidth; pad.height = container.clientHeight;
+            pctx.lineCap = 'round'; pctx.lineJoin = 'round';
+            clearCanvas();
         }
+        function getMousePos(e) {
+            const rect = pad.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: (clientX - rect.left) * (pad.width / rect.width), y: (clientY - rect.top) * (pad.height / rect.height) };
+        }
+        pad.addEventListener('mousedown', (e) => { drawing = true; const pos = getMousePos(e); pctx.beginPath(); pctx.moveTo(pos.x, pos.y); });
+        pad.addEventListener('mousemove', (e) => {
+            if (!drawing) return;
+            const pos = getMousePos(e);
+            pctx.lineWidth = document.getElementById('brush-size').value;
+            pctx.strokeStyle = document.getElementById('draw-color').value;
+            pctx.lineTo(pos.x, pos.y); pctx.stroke();
+        });
+        window.addEventListener('mouseup', () => drawing = false);
+        function clearCanvas() { pctx.fillStyle = "white"; pctx.fillRect(0, 0, pad.width, pad.height); }
+        function saveDrawing() { addToGallery(pad.toDataURL('image/png'), "Dibujo Artístico"); clearCanvas(); }
+
+        // --- GALERÍA (FIXED) ---
+        function addToGallery(url, label) {
+            const item = { id: Date.now(), url: url, label: label, timestamp: new Date().toLocaleString() };
+            photos.unshift(item);
+            saveAndRender();
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('waffly_photos', JSON.stringify(photos));
+            renderGallery();
+            showSaveIndicator();
+        }
+
         function renderGallery() {
             const container = document.getElementById('gallery-carousel');
-            if (!Array.isArray(photos) || photos.length === 0) { container.innerHTML = ''; document.getElementById('no-photos-msg').classList.remove('hidden'); return; }
-            document.getElementById('no-photos-msg').classList.add('hidden');
-            container.innerHTML = photos.map(p => `
-                <div class="gallery-item snap-start group" onclick="openPreview(${p.id})">
-                    <img src="${p.url}" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent opacity-0 group-hover:opacity-100 flex flex-col justify-end p-3 transition-opacity">
-                        <div class="flex justify-between items-center gap-2">
-                            <span class="text-[9px] text-pink-200 font-bold truncate">${p.label}</span>
-                            <button onclick="event.stopPropagation(); deletePhoto(${p.id})" class="text-white bg-red-600/80 px-2 py-1 rounded text-[10px]">✕</button>
-                        </div>
+            const countLabel = document.getElementById('gallery-count');
+            const noPhotos = document.getElementById('no-photos-msg');
+            countLabel.innerText = `${photos.length} ELEMENTOS`;
+            if (photos.length === 0) {
+                container.innerHTML = '';
+                noPhotos.classList.remove('hidden');
+                return;
+            }
+            noPhotos.classList.add('hidden');
+            container.innerHTML = photos.map(photo => `
+                <div class="gallery-item snap-start" onclick="openPreview(${photo.id})">
+                    <img src="${photo.url}" class="w-full h-full object-cover">
+                    <div class="gallery-controls">
+                        <button onclick="event.stopPropagation(); downloadMedia(${photo.id})" class="bg-blue-500 p-2 rounded-lg text-white">💾</button>
+                        <button onclick="event.stopPropagation(); deleteMedia(${photo.id})" class="bg-red-500 p-2 rounded-lg text-white">🗑️</button>
                     </div>
-                </div>`).join('');
+                </div>
+            `).join('');
         }
-        function deletePhoto(id) { photos = photos.filter(p => p.id !== id); localStorage.setItem('waffly_photos', JSON.stringify(photos)); renderGallery(); showSaveIndicator(); }
+
         function openPreview(id) {
-            const photo = photos.find(p => p.id === id); if(!photo) return;
+            const photo = photos.find(p => p.id === id);
+            if (!photo) return;
             const modal = document.getElementById('preview-modal');
-            const modalImg = document.getElementById('modal-img');
-            const modalVid = document.getElementById('modal-video');
-            modalVid.classList.add('hidden'); modalImg.classList.remove('hidden'); modalImg.src = photo.url;
-            document.getElementById('modal-caption').innerText = `${photo.label} — ${photo.time}`;
+            const img = document.getElementById('modal-img');
+            img.src = photo.url;
+            img.classList.remove('hidden');
+            img.classList.remove('zoomed');
+            document.getElementById('modal-caption').innerText = `${photo.label} • ${photo.timestamp}`;
+            document.getElementById('delete-btn-modal').onclick = () => { deleteMedia(id); closePreview(); };
+            document.getElementById('download-btn-modal').onclick = () => downloadMedia(id);
             modal.classList.remove('hidden');
         }
-        function openCamFull() {
-            const video = document.getElementById('webcam'); if(!video.srcObject) return;
-            const modal = document.getElementById('preview-modal');
-            const modalImg = document.getElementById('modal-img');
-            const modalVid = document.getElementById('modal-video');
-            modalImg.classList.add('hidden'); modalVid.classList.remove('hidden');
-            modalVid.srcObject = video.srcObject; modalVid.style.transform = "scaleX(-1)";
-            document.getElementById('modal-caption').innerText = "Directo";
-            modal.classList.remove('hidden');
-        }
-        function closePreview() { document.getElementById('preview-modal').classList.add('hidden'); document.getElementById('modal-video').srcObject = null; }
 
-        function archiveNote() {
-            const content = document.getElementById('notes').value.trim(); if (!content) return;
-            noteHistory.unshift({ id: Date.now(), content, date: new Date().toLocaleString('es-ES', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) });
-            localStorage.setItem('waffly_note_history', JSON.stringify(noteHistory));
-            updateNotesHistoryUI(); showSaveIndicator();
-        }
-        function updateNotesHistoryUI() {
-            const list = document.getElementById('notes-history-list');
-            if(!Array.isArray(noteHistory)) noteHistory = [];
-            list.innerHTML = noteHistory.map(note => `
-                <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-700 mb-2">
-                    <div class="flex justify-between items-start">
-                        <span class="text-[9px] text-slate-500 font-mono">${note.date}</span>
-                        <button onclick="deleteArchivedNote(${note.id})" class="text-slate-500">✕</button>
-                    </div>
-                    <p class="text-xs text-slate-300 line-clamp-2 my-1">${note.content}</p>
-                    <button onclick="restoreNote(${note.id})" class="text-[9px] text-pink-300 uppercase">Restaurar</button>
-                </div>`).join('') || '<p class="text-center text-slate-600 text-xs py-10">Archivo vacío</p>';
-        }
-        function restoreNote(id) {
-            const n = noteHistory.find(x => x.id === id);
-            if (n) { document.getElementById('notes').value = n.content; localStorage.setItem('waffly_current_note', n.content); toggleSidebar('notes-history-sidebar'); showSaveIndicator(); }
-        }
-        function deleteArchivedNote(id) { noteHistory = noteHistory.filter(x => x.id !== id); localStorage.setItem('waffly_note_history', JSON.stringify(noteHistory)); updateNotesHistoryUI(); showSaveIndicator(); }
-        function clearCurrentNote() { document.getElementById('notes').value = ""; localStorage.setItem('waffly_current_note', ""); showSaveIndicator(); }
-        let saveNoteTimer;
-        document.getElementById('notes').addEventListener('input', (e) => {
-            localStorage.setItem('waffly_current_note', e.target.value);
-            clearTimeout(saveNoteTimer); saveNoteTimer = setTimeout(showSaveIndicator, 1500);
-        });
+        function toggleZoom() { document.getElementById('modal-img').classList.toggle('zoomed'); }
+        function closePreview() { document.getElementById('preview-modal').classList.add('hidden'); }
 
-        const tag = document.createElement('script'); tag.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(tag);
+        function deleteMedia(id) {
+            if (!confirm("¿Seguro que quieres borrar este recuerdo?")) return;
+            photos = photos.filter(p => p.id !== id);
+            saveAndRender();
+        }
+
+        function downloadMedia(id) {
+            const photo = photos.find(p => p.id === id);
+            if (!photo) return;
+            const a = document.createElement('a'); a.href = photo.url; a.download = `waffly-${id}.png`; a.click();
+        }
+
+        // --- OTROS ---
         function onYouTubeIframeAPIReady() {
-            const lastId = (Array.isArray(history) && history.length > 0) ? history[history.length - 1] : DEFAULT_VIDEO;
-            player = new YT.Player('player', { height: '100%', width: '100%', videoId: lastId });
+            player = new YT.Player('player', { height: '100%', width: '100%', videoId: history[0] || DEFAULT_VIDEO });
         }
         function changeVideo(id = null) {
-            let vId = id;
-            if(!vId) {
-                const input = document.getElementById('video-url').value;
-                if (input.includes('v=')) vId = input.split('v=')[1].split('&')[0];
-                else if (input.includes('youtu.be/')) vId = input.split('youtu.be/')[1];
-                else vId = input;
-            }
-            if (vId && vId.length >= 11) {
-                player.loadVideoById(vId); history = history.filter(x => x !== vId); history.push(vId);
-                localStorage.setItem('waffly_history', JSON.stringify(history));
-                updateHistoryUI(); showSaveIndicator();
+            let vId = id || document.getElementById('video-url').value.split('v=')[1]?.substring(0,11) || document.getElementById('video-url').value;
+            if (vId) {
+                player.loadVideoById(vId);
+                if (!history.includes(vId)) { history.unshift(vId); localStorage.setItem('waffly_history', JSON.stringify(history)); updateHistoryUI(); }
             }
         }
         function updateHistoryUI() {
-            const list = document.getElementById('history-list');
-            if(!Array.isArray(history)) history = [DEFAULT_VIDEO];
-            list.innerHTML = history.slice().reverse().map(id => `
-                <div class="relative flex gap-3 p-2 bg-slate-900/50 rounded-xl cursor-pointer" onclick="changeVideo('${id}')">
-                    <img src="https://img.youtube.com/vi/${id}/mqdefault.jpg" class="w-16 aspect-video rounded object-cover">
-                    <span class="text-[10px] text-slate-100 font-bold self-center">Reproducir</span>
-                </div>`).join('');
+            document.getElementById('history-list').innerHTML = history.map(id => `
+                <div class="bg-slate-950 p-3 rounded-2xl flex gap-3 cursor-pointer" onclick="changeVideo('${id}')">
+                    <img src="https://img.youtube.com/vi/${id}/mqdefault.jpg" class="w-20 rounded-lg">
+                    <span class="text-[10px] text-pink-300 font-black self-center">VÍDEO ${id}</span>
+                </div>
+            `).join('');
+        }
+
+        function archiveNote() {
+            const content = document.getElementById('notes').value.trim();
+            if (!content) return;
+            noteHistory.unshift({ id: Date.now(), content, date: new Date().toLocaleString() });
+            localStorage.setItem('waffly_note_history', JSON.stringify(noteHistory));
+            updateNotesHistoryUI();
+            document.getElementById('notes').value = "";
+            showSaveIndicator();
+        }
+
+        function updateNotesHistoryUI() {
+            document.getElementById('notes-history-list').innerHTML = noteHistory.map(n => `
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 mb-2">
+                    <p class="text-xs text-slate-400 font-mono">${n.date}</p>
+                    <p class="text-sm text-slate-200 line-clamp-2">${n.content}</p>
+                    <button onclick="deleteNote(${n.id})" class="text-[10px] text-red-500 font-black uppercase mt-2">Borrar</button>
+                </div>
+            `).join('');
+        }
+
+        function deleteNote(id) {
+            noteHistory = noteHistory.filter(n => n.id !== id);
+            localStorage.setItem('waffly_note_history', JSON.stringify(noteHistory));
+            updateNotesHistoryUI();
         }
 
         function renderSounds() {
-            if(!Array.isArray(sounds)) sounds = [];
             document.getElementById('sound-grid').innerHTML = sounds.map((s, i) => `
-                <div class="group relative bg-slate-700/50 p-2 rounded-lg border border-slate-600 cursor-pointer" onclick="new Audio(sounds[${i}].data).play()">
-                    <div class="flex items-center gap-2 overflow-hidden">
-                        <span class="text-lg">🔊</span><span class="text-[10px] truncate text-slate-300">${s.name}</span>
-                    </div>
-                    <button onclick="event.stopPropagation(); deleteSound(${i})" class="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 bg-red-500 text-white rounded-full w-4 h-4 text-[10px]">✕</button>
-                </div>`).join('');
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                    <span class="text-[10px] text-slate-400 block mb-2">${s.name}</span>
+                    <button onclick="new Audio('${s.data}').play()" class="w-full bg-pink-500/10 text-pink-200 py-2 rounded-xl text-xs font-black">PLAY</button>
+                </div>
+            `).join('');
         }
-        function addNewSound(e) {
-            const f = e.target.files[0]; if(!f) return;
-            const r = new FileReader();
-            r.onload = (ev) => {
-                if(!Array.isArray(sounds)) sounds = [];
-                sounds.push({ name: f.name.replace(/\.[^/.]+$/, ""), data: ev.target.result });
-                localStorage.setItem('waffly_custom_sounds', JSON.stringify(sounds));
-                renderSounds(); showSaveIndicator();
-            };
-            r.readAsDataURL(f);
-        }
-        function deleteSound(i) { sounds.splice(i, 1); localStorage.setItem('waffly_custom_sounds', JSON.stringify(sounds)); renderSounds(); showSaveIndicator(); }
 
-        function toggleSidebar(id) {
-            const s = document.getElementById(id); const isOpen = s.classList.contains('open');
-            document.querySelectorAll('.sidebar').forEach(x => x.classList.remove('open'));
-            if (!isOpen) s.classList.add('open');
+        function addNewSound(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (ev) => { sounds.push({ name: file.name, data: ev.target.result }); localStorage.setItem('waffly_custom_sounds', JSON.stringify(sounds)); renderSounds(); };
+            reader.readAsDataURL(file);
         }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text || !userApiKey) return;
+            const container = document.getElementById('chat-container');
+            const uDiv = document.createElement('div'); uDiv.className = "chat-bubble chat-user"; uDiv.innerText = text; container.appendChild(uDiv);
+            input.value = "";
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ contents: [{ parts: [{ text }] }] })
+                });
+                const data = await res.json();
+                const aiDiv = document.createElement('div'); aiDiv.className = "chat-bubble chat-ai";
+                aiDiv.innerText = data.candidates[0].content.parts[0].text;
+                container.appendChild(aiDiv);
+            } catch (e) { console.error(e); }
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function toggleSidebar(id) { document.getElementById(id).classList.toggle('open'); }
         function toggleSettings() { document.getElementById('settings-modal').classList.toggle('hidden'); }
-        function toggleSecondsPreference() { showSeconds = document.getElementById('show-seconds-toggle').checked; localStorage.setItem('waffly_show_seconds', showSeconds); updateClock(); }
-        
-        function factoryReset() { 
-            if(confirm("¿Borrar todo?")) { 
-                localStorage.clear(); 
-                window.location.reload(); 
-            } 
-        }
+        function saveApiKey() { userApiKey = document.getElementById('api-key-input').value; localStorage.setItem('waffly_api_key', userApiKey); checkApiWarning(); }
+        function checkApiWarning() { document.getElementById('api-warning').classList.toggle('hidden', !!userApiKey); }
+        function showSaveIndicator() { const el = document.getElementById('save-indicator'); el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2000); }
+        function factoryReset() { if (confirm("¿BORRAR TODO?")) { localStorage.clear(); location.reload(); } }
+
+        const tag = document.createElement('script'); tag.src = "https://www.youtube.com/iframe_api";
+        document.head.appendChild(tag);
     </script>
 </body>
 </html>
