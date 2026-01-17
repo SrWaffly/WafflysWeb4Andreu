@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sr.Waffly's Place - v1.0.0</title>
+    <title>Sr.Waffly's Place</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @keyframes naturalFloat {
@@ -36,7 +36,7 @@
             transform: scaleX(-1);
         }
 
-        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #1e293b; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
 
@@ -57,108 +57,152 @@
             backdrop-filter: blur(4px);
         }
 
-        .history-item:hover .delete-btn { opacity: 1; }
+        /* Estilo unificado para el reloj siempre en píldora */
+        #dynamic-clock {
+            font-family: 'ui-monospace', 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, monospace;
+            letter-spacing: -0.05em;
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            z-index: 60;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px) saturate(180%);
+            padding: 0.6rem 1.4rem;
+            border-radius: 24px;
+            border: 1px solid rgba(251, 207, 232, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fbcfe8;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 320px;
+            background: #1e293b;
+            z-index: 100;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            border-left: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+        }
+
+        .sidebar.open { transform: translateX(0); }
+
+        .gallery-item {
+            flex: 0 0 auto;
+            width: 200px;
+            aspect-ratio: 16/9;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .gallery-item:hover { border-color: #fbcfe8; transform: scale(1.05); }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 overflow-x-hidden">
 
-    <!-- Modal de Bienvenida / Recuperación -->
-    <div id="session-modal" class="fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-800 border border-slate-700 p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-6 text-center">
-            <span class="text-5xl">🐾</span>
-            <h3 class="text-2xl font-bold text-pink-200 mt-4">¡Hola de nuevo!</h3>
-            <p class="text-slate-400">Hemos detectado datos guardados de tu sesión anterior.</p>
-            <div class="space-y-3">
-                <button onclick="sessionAction('continue')" class="w-full btn-primary py-3 rounded-xl">Continuar donde lo dejé</button>
-                <button onclick="sessionAction('reset')" class="w-full bg-slate-700 hover:bg-red-500/20 py-3 rounded-xl border border-slate-600 transition-all text-sm">Empezar de cero (Borrar todo)</button>
-            </div>
-            <div class="flex items-center gap-3 justify-center text-xs text-slate-500">
-                <input type="checkbox" id="skip-modal" class="rounded bg-slate-900 border-slate-700 text-pink-400">
-                <label for="skip-modal">No volver a preguntar (recordar mi elección)</label>
-            </div>
-        </div>
-    </div>
+    <!-- Reloj Dinámico (Siempre fijo en píldora) -->
+    <div id="dynamic-clock">00:00</div>
 
-    <!-- Menú de Ajustes / Factory Reset -->
-    <div id="settings-modal" class="fixed inset-0 z-[100] modal-overlay flex items-center justify-center p-4 hidden">
-        <div class="bg-slate-800 border border-red-500/30 p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-6">
+    <!-- Menú de Ajustes -->
+    <div id="settings-modal" class="fixed inset-0 z-[110] modal-overlay flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-6">
             <div class="text-center">
                 <span class="text-4xl">⚙️</span>
-                <h3 class="text-2xl font-bold text-white mt-4">Ajustes del Sistema</h3>
-                <p class="text-slate-400 text-sm mt-2">Gestiona el almacenamiento de la web.</p>
+                <h3 class="text-2xl font-bold text-white mt-4">Ajustes</h3>
             </div>
-            <div class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-                <p class="text-xs text-red-200 mb-4">Esta acción borrará sonidos, historial, notas y reseteará las preferencias de inicio.</p>
-                <button onclick="factoryReset()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all">Borrar toda la información</button>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 bg-slate-900/50 rounded-xl border border-slate-700">
+                    <div>
+                        <p class="text-sm font-bold text-pink-200">Mostrar Segundos</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="show-seconds-toggle" class="sr-only peer" onchange="toggleSecondsPreference()">
+                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-500"></div>
+                    </label>
+                </div>
+                <div class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                    <button onclick="factoryReset()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all">Borrar Datos</button>
+                </div>
             </div>
-            <button onclick="toggleSettings()" class="w-full text-slate-400 text-sm hover:underline">Cancelar</button>
+            <button onclick="toggleSettings()" class="w-full text-slate-400 text-sm hover:underline">Cerrar</button>
         </div>
     </div>
 
-    <!-- Banner de Cookies -->
-    <div id="cookie-banner" class="fixed bottom-0 left-0 right-0 z-[90] p-6 translate-y-full transition-transform duration-500">
-        <div class="max-w-4xl mx-auto bg-slate-800 border border-pink-500/30 rounded-2xl shadow-2xl p-6 flex flex-col md:flex-row items-center gap-6">
-            <div class="flex-1 text-center md:text-left">
-                <h4 class="font-bold text-pink-200">🍪 Aviso de Privacidad Local</h4>
-                <p class="text-sm text-slate-400">Usamos almacenamiento local para tus notas, sonidos e historial. Nada sale de tu navegador.</p>
-            </div>
-            <button onclick="acceptCookies()" class="btn-primary px-8 py-2 rounded-xl text-sm">Aceptar y Guardar</button>
-        </div>
-    </div>
-
-    <!-- Historial Lateral -->
-    <div id="history-sidebar" class="fixed top-0 right-0 h-full w-80 bg-slate-800 shadow-2xl z-50 translate-x-full transition-transform duration-300 border-l border-slate-700 p-6 flex flex-col">
+    <!-- Panel Lateral: Historial Visual -->
+    <div id="history-sidebar" class="sidebar">
         <div class="flex justify-between items-center mb-6">
             <h3 class="font-bold text-pink-200">Historial Visual</h3>
-            <button onclick="toggleHistory()" class="text-slate-400 hover:text-white text-2xl">&times;</button>
+            <button onclick="toggleSidebar('history-sidebar')" class="text-slate-400 hover:text-white text-2xl">&times;</button>
         </div>
         <div id="history-list" class="space-y-4 overflow-y-auto flex-1 custom-scroll pr-2"></div>
-        <button onclick="clearHistory()" class="mt-6 py-3 text-xs bg-red-500/20 hover:bg-red-500/40 text-red-200 rounded-xl border border-red-500/30 transition-all">Limpiar Historial</button>
+        <button onclick="clearHistory()" class="mt-6 py-3 text-xs bg-red-500/20 text-red-200 rounded-xl border border-red-500/30">Limpiar Historial</button>
     </div>
 
-    <div class="max-w-6xl mx-auto space-y-8">
-        <!-- Header -->
-        <header class="text-center relative">
+    <!-- Panel Lateral: Historial de Notas -->
+    <div id="notes-history-sidebar" class="sidebar">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-pink-200">Archivo de Notas</h3>
+            <button onclick="toggleSidebar('notes-history-sidebar')" class="text-slate-400 hover:text-white text-2xl">&times;</button>
+        </div>
+        <div id="notes-history-list" class="space-y-4 overflow-y-auto flex-1 custom-scroll pr-2"></div>
+    </div>
+
+    <div class="max-w-6xl mx-auto space-y-8 relative">
+        <header class="text-center relative pt-4">
             <div class="emoji-animated">🐱</div>
             <h1 class="text-4xl font-bold mt-2 text-pink-200">Sr.Waffly's Place</h1>
-            <p class="text-slate-400 text-sm uppercase tracking-widest font-mono">Versión 1.0.0 / GitHub Hosted</p>
+            <p class="text-[10px] text-slate-500 mt-1 uppercase tracking-widest font-mono">v2.5.0 • GitHub Hosted</p>
             <div class="absolute right-0 top-1/2 -translate-y-1/2 flex gap-2">
+                <button onclick="toggleSidebar('notes-history-sidebar')" class="bg-slate-800 p-3 rounded-full hover:bg-slate-700 border border-slate-700 shadow-lg" title="Historial de Notas">📝</button>
+                <button onclick="toggleSidebar('history-sidebar')" class="bg-slate-800 p-3 rounded-full hover:bg-slate-700 border border-slate-700 shadow-lg" title="Historial Visual">🕒</button>
                 <button onclick="toggleSettings()" class="bg-slate-800 p-3 rounded-full hover:bg-slate-700 border border-slate-700 shadow-lg" title="Ajustes">⚙️</button>
-                <button onclick="toggleHistory()" class="bg-slate-800 p-3 rounded-full hover:bg-slate-700 border border-slate-700 shadow-lg" title="Historial">🕒</button>
             </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Cámara -->
             <div class="lg:col-span-2">
-                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                    <h2 class="text-xl font-semibold mb-4 text-pink-200 flex items-center gap-2">📷 Cámara en Vivo</h2>
+                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+                    <h2 class="text-xl font-semibold mb-4 text-pink-200 flex items-center gap-2">📷 Cámara</h2>
                     <div id="video-container">
                         <video id="webcam" autoplay playsinline></video>
                         <div id="cam-msg" class="absolute inset-0 flex items-center justify-center text-slate-500">Cámara Apagada</div>
                     </div>
                     <div class="mt-4 flex gap-3">
                         <button onclick="startCamera()" class="btn-primary flex-1 py-3 rounded-xl">Activar</button>
+                        <button onclick="takeSnapshot()" id="snap-btn" class="bg-pink-500/20 hover:bg-pink-500/40 border border-pink-500/30 text-pink-100 px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed" disabled>Capturar</button>
                         <button onclick="stopCamera()" class="bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-xl font-bold">Apagar</button>
                     </div>
                 </section>
             </div>
 
-            <!-- Notas -->
             <div class="lg:col-span-1">
-                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 h-full flex flex-col">
+                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl h-full flex flex-col">
                     <h2 class="text-xl font-semibold mb-4 text-pink-200">📝 Notas Rápidas</h2>
-                    <textarea id="notes" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-4 text-slate-200 focus:outline-none resize-none custom-scroll" placeholder="Escribe aquí..." oninput="saveNotes()"></textarea>
+                    <textarea id="notes" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-4 text-slate-200 focus:outline-none resize-none custom-scroll mb-4" placeholder="Escribe algo..."></textarea>
+                    <div class="flex gap-2">
+                        <button id="save-note-btn" onclick="archiveNote(event)" class="flex-1 btn-primary py-2 rounded-lg text-sm">Guardar</button>
+                        <button onclick="clearCurrentNote()" class="px-4 py-2 bg-slate-700 hover:bg-red-500/20 text-slate-300 rounded-lg text-sm border border-slate-600 transition-all">Borrar</button>
+                    </div>
                 </section>
             </div>
 
-            <!-- YouTube -->
             <div class="lg:col-span-3">
-                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
                     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                        <h2 class="text-xl font-semibold text-pink-200">📺 YouTube Player</h2>
+                        <h2 class="text-xl font-semibold text-pink-200">📺 Reproductor</h2>
                         <div class="flex w-full md:w-auto gap-2">
-                            <input type="text" id="video-url" placeholder="ID o URL de YouTube..." class="bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm w-full md:w-80 focus:border-pink-300 outline-none">
+                            <input type="text" id="video-url" placeholder="URL de YouTube..." class="bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm w-full md:w-80 focus:border-pink-300 outline-none">
                             <button onclick="changeVideo()" class="btn-primary px-6 py-2 rounded-lg">Cargar</button>
                         </div>
                     </div>
@@ -168,135 +212,248 @@
                 </section>
             </div>
 
-            <!-- Sonidos -->
+            <!-- Sección de Sonidos -->
             <div class="lg:col-span-3">
-                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-semibold text-pink-200">🎵 Mis Sonidos</h2>
+                        <h2 class="text-xl font-semibold text-pink-200">🎵 Sonidos</h2>
                         <button onclick="document.getElementById('audio-upload').click()" class="btn-primary px-4 py-2 rounded-lg text-sm">+ Añadir</button>
                         <input type="file" id="audio-upload" class="hidden" accept="audio/*" onchange="addNewSound(event)">
                     </div>
                     <div id="sound-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"></div>
-                    <div id="no-sounds-msg" class="text-center py-10 text-slate-500 hidden">No hay sonidos cargados.</div>
+                    <div id="no-sounds-msg" class="text-center py-10 text-slate-500 hidden">Vacío</div>
+                </section>
+            </div>
+
+            <!-- Sección de Galería de Capturas -->
+            <div class="lg:col-span-3">
+                <section class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl overflow-hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-semibold text-pink-200">🖼️ Galería de Capturas</h2>
+                        <button onclick="clearGallery()" class="text-xs text-red-400 hover:underline">Borrar Todas</button>
+                    </div>
+                    <div id="gallery-carousel" class="flex gap-4 overflow-x-auto pb-4 custom-scroll snap-x">
+                        <!-- Las fotos se inyectarán aquí -->
+                    </div>
+                    <div id="no-photos-msg" class="text-center py-8 text-slate-500 hidden">No hay capturas aún</div>
                 </section>
             </div>
         </div>
     </div>
 
+    <!-- Canvas oculto para capturar frames -->
+    <canvas id="snapshot-canvas" class="hidden"></canvas>
+
     <script>
         const DEFAULT_VIDEO = 'ou2JKwDHYhw';
         let history = [];
+        let noteHistory = [];
         let sounds = [];
-        let autoCam = false;
+        let photos = [];
+        let showSeconds = false;
         let player;
 
-        window.onload = function() {
-            const consent = localStorage.getItem('waffly_consent');
-            const skipModal = localStorage.getItem('waffly_skip_modal');
-            const hasData = localStorage.getItem('waffly_history') || localStorage.getItem('waffly_custom_sounds') || localStorage.getItem('waffly_notes');
-
-            if (!consent) document.getElementById('cookie-banner').classList.remove('translate-y-full');
-
-            if (hasData && !skipModal) {
-                document.getElementById('session-modal').classList.remove('hidden');
-            } else if (skipModal === 'reset') {
-                sessionAction('reset', true);
-            } else {
-                loadAppData();
+        function updateClock() {
+            const now = new Date();
+            const opts = { hour: '2-digit', minute: '2-digit', hour12: false };
+            if (showSeconds) opts.second = '2-digit';
+            const clockEl = document.getElementById('dynamic-clock');
+            if (clockEl) {
+                clockEl.innerText = now.toLocaleTimeString('es-ES', opts);
             }
+        }
+        setInterval(updateClock, 1000);
+
+        function toggleSecondsPreference() {
+            showSeconds = document.getElementById('show-seconds-toggle').checked;
+            localStorage.setItem('waffly_show_seconds', showSeconds);
+            updateClock();
+        }
+
+        window.onload = function() {
+            showSeconds = localStorage.getItem('waffly_show_seconds') === 'true';
+            const toggle = document.getElementById('show-seconds-toggle');
+            if(toggle) toggle.checked = showSeconds;
+            updateClock();
+            loadAppData();
         };
 
         function loadAppData() {
             history = JSON.parse(localStorage.getItem('waffly_history') || '[]');
-            
-            if (history.length === 0) {
-                history.push(DEFAULT_VIDEO);
-                localStorage.setItem('waffly_history', JSON.stringify(history));
-            }
-
+            noteHistory = JSON.parse(localStorage.getItem('waffly_note_history') || '[]');
             sounds = JSON.parse(localStorage.getItem('waffly_custom_sounds') || '[]');
-            document.getElementById('notes').value = localStorage.getItem('waffly_notes') || '';
-            autoCam = localStorage.getItem('waffly_auto_cam') === 'true';
+            photos = JSON.parse(localStorage.getItem('waffly_photos') || '[]');
+            document.getElementById('notes').value = localStorage.getItem('waffly_current_note') || '';
             
-            if (autoCam) startCamera();
+            if (history.length === 0) history.push(DEFAULT_VIDEO);
+            
             renderSounds();
+            renderGallery();
             updateHistoryUI();
+            updateNotesHistoryUI();
         }
 
-        function sessionAction(type, silent = false) {
-            const skip = document.getElementById('skip-modal').checked;
-            if (type === 'reset') {
-                clearLocalStorageAll();
-                if (skip) localStorage.setItem('waffly_skip_modal', 'reset');
-            } else {
-                if (skip) localStorage.setItem('waffly_skip_modal', 'continue');
+        async function startCamera() {
+            try {
+                const s = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.getElementById('webcam');
+                video.srcObject = s;
+                document.getElementById('cam-msg').classList.add('hidden');
+                document.getElementById('snap-btn').disabled = false;
+            } catch (e) { console.error("Error al acceder a la cámara"); }
+        }
+
+        function stopCamera() {
+            const v = document.getElementById('webcam');
+            if(v.srcObject) v.srcObject.getTracks().forEach(t => t.stop());
+            v.srcObject = null;
+            document.getElementById('cam-msg').classList.remove('hidden');
+            document.getElementById('snap-btn').disabled = true;
+        }
+
+        function takeSnapshot() {
+            const video = document.getElementById('webcam');
+            const canvas = document.getElementById('snapshot-canvas');
+            if (!video.srcObject) return;
+
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            context.translate(canvas.width, 0);
+            context.scale(-1, 1);
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const dataUrl = canvas.toDataURL('image/webp');
+            const photoObj = {
+                id: Date.now(),
+                url: dataUrl,
+                time: new Date().toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'})
+            };
+
+            photos.unshift(photoObj);
+            if(photos.length > 20) photos.pop();
+            localStorage.setItem('waffly_photos', JSON.stringify(photos));
+            renderGallery();
+        }
+
+        function renderGallery() {
+            const container = document.getElementById('gallery-carousel');
+            const emptyMsg = document.getElementById('no-photos-msg');
+            if (!container) return;
+
+            if (photos.length === 0) {
+                container.innerHTML = '';
+                emptyMsg.classList.remove('hidden');
+                return;
             }
-            if (!silent) document.getElementById('session-modal').classList.add('hidden');
-            loadAppData();
+            emptyMsg.classList.add('hidden');
+            
+            container.innerHTML = photos.map((p) => `
+                <div class="gallery-item snap-start group">
+                    <img src="${p.url}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] text-white font-mono">${p.time}</span>
+                            <button onclick="deletePhoto(${p.id})" class="text-red-400 text-xs bg-slate-900/80 px-2 py-1 rounded">Borrar</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        function factoryReset() {
-            if(confirm("¿Estás seguro? Esto eliminará sonidos, miniaturas, historial y notas.")) {
-                clearLocalStorageAll();
-                location.reload();
+        function deletePhoto(id) {
+            photos = photos.filter(p => p.id !== id);
+            localStorage.setItem('waffly_photos', JSON.stringify(photos));
+            renderGallery();
+        }
+
+        function clearGallery() {
+            if(confirm("¿Seguro que quieres borrar todas las fotos?")) {
+                photos = [];
+                localStorage.setItem('waffly_photos', JSON.stringify(photos));
+                renderGallery();
             }
         }
 
-        function clearLocalStorageAll() {
-            localStorage.clear();
+        function archiveNote(e) {
+            const textarea = document.getElementById('notes');
+            const content = textarea.value.trim();
+            if (!content) return;
+            
+            const noteObj = {
+                id: Date.now(),
+                content: content,
+                date: new Date().toLocaleString('es-ES', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })
+            };
+            
+            noteHistory.unshift(noteObj);
+            if (noteHistory.length > 50) noteHistory.pop();
+            
+            localStorage.setItem('waffly_note_history', JSON.stringify(noteHistory));
+            updateNotesHistoryUI();
+            
+            const btn = e.target;
+            const original = btn.innerText;
+            btn.innerText = "¡Listo!";
+            setTimeout(() => btn.innerText = original, 2000);
         }
 
-        function acceptCookies() {
-            localStorage.setItem('waffly_consent', 'true');
-            document.getElementById('cookie-banner').classList.add('translate-y-full');
-            loadAppData();
+        function clearCurrentNote() {
+            const textarea = document.getElementById('notes');
+            textarea.value = "";
+            localStorage.setItem('waffly_current_note', "");
+        }
+
+        function updateNotesHistoryUI() {
+            const list = document.getElementById('notes-history-list');
+            if (!list) return;
+            if (noteHistory.length === 0) {
+                list.innerHTML = '<p class="text-center text-slate-500 text-sm py-10">Vacío</p>';
+                return;
+            }
+            list.innerHTML = noteHistory.map((note) => `
+                <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-700 mb-2">
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-[10px] text-pink-300/50 font-mono">${note.date}</span>
+                        <button onclick="deleteArchivedNote(${note.id})" class="text-slate-500 hover:text-red-400">✕</button>
+                    </div>
+                    <p class="text-xs text-slate-300 line-clamp-2 mb-2 cursor-default">${note.content}</p>
+                    <button onclick="restoreNote(${note.id})" class="text-[10px] text-pink-300 hover:underline uppercase">Cargar</button>
+                </div>
+            `).join('');
+        }
+
+        function restoreNote(id) {
+            const note = noteHistory.find(n => n.id === id);
+            if (note) {
+                document.getElementById('notes').value = note.content;
+                localStorage.setItem('waffly_current_note', note.content);
+                toggleSidebar('notes-history-sidebar');
+            }
+        }
+
+        function deleteArchivedNote(id) {
+            noteHistory = noteHistory.filter(n => n.id !== id);
+            localStorage.setItem('waffly_note_history', JSON.stringify(noteHistory));
+            updateNotesHistoryUI();
+        }
+
+        function toggleSidebar(id) {
+            const sidebar = document.getElementById(id);
+            const isOpen = sidebar.classList.contains('open');
+            document.querySelectorAll('.sidebar').forEach(s => s.classList.remove('open'));
+            if (!isOpen) sidebar.classList.add('open');
         }
 
         function toggleSettings() { document.getElementById('settings-modal').classList.toggle('hidden'); }
 
-        // --- Gestión de Sonidos ---
-        function renderSounds() {
-            const grid = document.getElementById('sound-grid');
-            const msg = document.getElementById('no-sounds-msg');
-            grid.innerHTML = '';
-            if (sounds.length === 0) { msg.classList.remove('hidden'); return; }
-            msg.classList.add('hidden');
-            sounds.forEach((sound, index) => {
-                const div = document.createElement('div');
-                div.className = "sound-card relative group bg-slate-700 rounded-xl p-4 border border-slate-600 hover:bg-slate-600 transition-all";
-                div.innerHTML = `
-                    <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="playCustomSound(${index})">
-                        <span class="text-3xl">🔊</span>
-                        <span class="text-sm font-medium truncate w-full text-center">${sound.name}</span>
-                    </div>
-                    <div class="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100">
-                        <button onclick="editSound(${index})" class="p-1 bg-slate-800 rounded text-[10px]">✏️</button>
-                        <button onclick="deleteSound(${index})" class="p-1 bg-slate-800 rounded text-[10px]">✕</button>
-                    </div>`;
-                grid.appendChild(div);
-            });
-        }
-        async function addNewSound(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                sounds.push({ name: file.name.split('.')[0], data: ev.target.result });
-                localStorage.setItem('waffly_custom_sounds', JSON.stringify(sounds));
-                renderSounds();
-            };
-            reader.readAsDataURL(file);
-        }
-        function playCustomSound(i) { new Audio(sounds[i].data).play(); }
-        function deleteSound(i) { sounds.splice(i, 1); localStorage.setItem('waffly_custom_sounds', JSON.stringify(sounds)); renderSounds(); }
-        function editSound(i) { const n = prompt("Nombre:", sounds[i].name); if(n){ sounds[i].name=n; localStorage.setItem('waffly_custom_sounds', JSON.stringify(sounds)); renderSounds(); }}
-
-        // --- YouTube ---
         const tag = document.createElement('script'); tag.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(tag);
         function onYouTubeIframeAPIReady() {
             const lastId = history.length > 0 ? history[history.length - 1] : DEFAULT_VIDEO;
             player = new YT.Player('player', { height: '100%', width: '100%', videoId: lastId });
         }
+
         function changeVideo(id = null) {
             let vId = id;
             if(!vId) {
@@ -307,7 +464,6 @@
             }
             if (vId && vId.length >= 11) {
                 player.loadVideoById(vId);
-                // Mover al principio si ya existe, o añadir si es nuevo
                 history = history.filter(item => item !== vId);
                 history.push(vId);
                 localStorage.setItem('waffly_history', JSON.stringify(history));
@@ -316,47 +472,59 @@
             }
         }
 
-        // --- Historial con Miniaturas ---
         function updateHistoryUI() {
             const list = document.getElementById('history-list');
-            list.innerHTML = history.slice().reverse().map((id, i) => `
-                <div class="history-item relative group flex gap-3 p-2 bg-slate-900/50 rounded-xl hover:bg-slate-700/50 transition-all border border-transparent hover:border-pink-500/30">
-                    <div class="w-24 aspect-video rounded-lg overflow-hidden flex-shrink-0 cursor-pointer shadow-lg" onclick="changeVideo('${id}')">
-                        <img src="https://img.youtube.com/vi/${id}/mqdefault.jpg" class="w-full h-full object-cover" alt="Miniatura">
+            if (!list) return;
+            list.innerHTML = history.slice().reverse().map((id) => `
+                <div class="relative flex gap-3 p-2 bg-slate-900/50 rounded-xl hover:bg-slate-700/50">
+                    <div class="w-24 aspect-video rounded-lg overflow-hidden flex-shrink-0 cursor-pointer" onclick="changeVideo('${id}')">
+                        <img src="https://img.youtube.com/vi/${id}/mqdefault.jpg" class="w-full h-full object-cover">
                     </div>
-                    <div class="flex flex-col justify-center flex-1 min-w-0 pr-6">
-                        <span class="text-[10px] font-mono text-slate-500 truncate mb-1">ID: ${id}</span>
-                        <button onclick="changeVideo('${id}')" class="text-xs font-bold text-pink-100 hover:text-pink-300 transition-colors text-left truncate">
-                            Ver video
-                        </button>
+                    <div class="flex flex-col justify-center flex-1 min-w-0">
+                        <button onclick="changeVideo('${id}')" class="text-xs font-bold text-pink-100 truncate text-left">Ver video</button>
                     </div>
-                    <button onclick="removeFromHistory(${history.length - 1 - i})" class="delete-btn opacity-0 absolute top-2 right-2 text-slate-500 hover:text-red-400 transition-opacity">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
                 </div>`).join('');
         }
 
-        function removeFromHistory(i) { history.splice(i,1); localStorage.setItem('waffly_history', JSON.stringify(history)); updateHistoryUI(); }
-        function clearHistory() { history = [DEFAULT_VIDEO]; localStorage.setItem('waffly_history', JSON.stringify(history)); updateHistoryUI(); }
-        function toggleHistory() { document.getElementById('history-sidebar').classList.toggle('translate-x-full'); }
+        function factoryReset() {
+            if(confirm("¿Restablecer todo? Se perderán fotos, sonidos y notas.")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
 
-        // --- Cámara ---
-        async function startCamera() {
-            try {
-                const s = await navigator.mediaDevices.getUserMedia({ video: true });
-                document.getElementById('webcam').srcObject = s;
-                document.getElementById('cam-msg').classList.add('hidden');
-                localStorage.setItem('waffly_auto_cam', 'true');
-            } catch (e) {}
+        function renderSounds() {
+            const grid = document.getElementById('sound-grid');
+            if(!grid) return;
+            grid.innerHTML = sounds.map((s, i) => `
+                <div class="relative group bg-slate-700 rounded-xl p-4 border border-slate-600 hover:bg-slate-600">
+                    <div class="flex flex-col items-center gap-2 cursor-pointer" onclick="new Audio(sounds[${i}].data).play()">
+                        <span class="text-3xl">🔊</span>
+                        <span class="text-[10px] truncate w-full text-center text-slate-300">${s.name}</span>
+                    </div>
+                    <button onclick="deleteSound(${i})" class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 text-[10px] bg-slate-800 p-1 rounded">✕</button>
+                </div>`).join('');
+            document.getElementById('no-sounds-msg').className = sounds.length ? 'hidden' : 'text-center py-10 text-slate-500';
         }
-        function stopCamera() {
-            const v = document.getElementById('webcam');
-            if(v.srcObject) v.srcObject.getTracks().forEach(t => t.stop());
-            v.srcObject = null;
-            document.getElementById('cam-msg').classList.remove('hidden');
-            localStorage.setItem('waffly_auto_cam', 'false');
+
+        function addNewSound(event) {
+            const f = event.target.files[0];
+            if(!f) return;
+            const r = new FileReader();
+            r.onload = (ev) => {
+                sounds.push({ name: f.name.split('.')[0], data: ev.target.result });
+                localStorage.setItem('waffly_custom_sounds', JSON.stringify(sounds));
+                renderSounds();
+            };
+            r.readAsDataURL(f);
         }
-        function saveNotes() { localStorage.setItem('waffly_notes', document.getElementById('notes').value); }
+
+        function deleteSound(i) { sounds.splice(i, 1); localStorage.setItem('waffly_custom_sounds', JSON.stringify(sounds)); renderSounds(); }
+        function clearHistory() { history=[DEFAULT_VIDEO]; localStorage.setItem('waffly_history', JSON.stringify(history)); updateHistoryUI(); }
+
+        document.getElementById('notes').addEventListener('input', (e) => {
+            localStorage.setItem('waffly_current_note', e.target.value);
+        });
     </script>
 </body>
 </html>
